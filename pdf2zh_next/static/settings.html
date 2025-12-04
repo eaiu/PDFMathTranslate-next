@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - PDFMathTranslate</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="page-wrapper">
+        <!-- Header -->
+        <header class="header">
+            <nav class="nav container">
+                <div class="logo">PDFMathTranslate</div>
+                <ul class="nav-links">
+                    <li><a href="/upload.html" class="nav-link">Upload</a></li>
+                    <li><a href="/settings.html" class="nav-link active">Settings</a></li>
+                    <li><span class="nav-link" data-username></span></li>
+                    <li><a href="#" class="nav-link" id="logoutBtn">Logout</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <h1 class="mb-lg fade-in">⚙️ Settings</h1>
+
+                <div class="grid grid-2">
+                    <!-- Left Column -->
+                    <div>
+                        <!-- Account Settings -->
+                        <div class="card glass-card mb-md slide-in">
+                            <div class="card-header">
+                                <h3 class="card-title">👤 Account Settings</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label class="form-label">Username</label>
+                                    <input type="text" class="form-input" data-username readonly>
+                                </div>
+
+                                <h4 class="mt-md mb-sm">Change Password</h4>
+                                <form id="passwordForm">
+                                    <div class="form-group">
+                                        <label class="form-label" for="currentPassword">Current Password</label>
+                                        <input type="password" id="currentPassword" class="form-input" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="newPassword">New Password</label>
+                                        <input type="password" id="newPassword" class="form-input" required
+                                            minlength="6">
+                                        <span class="form-help">At least 6 characters</span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="confirmPassword">Confirm New Password</label>
+                                        <input type="password" id="confirmPassword" class="form-input" required>
+                                    </div>
+
+                                    <div id="passwordError" class="form-error" style="display: none;"></div>
+
+                                    <button type="submit" class="btn btn-primary btn-block">
+                                        Update Password
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- User Management (Admin Only) -->
+                        <div class="card glass-card mb-md slide-in" data-admin-only
+                            style="display: none; animation-delay: 0.1s;">
+                            <div class="card-header">
+                                <h3 class="card-title">👥 User Management</h3>
+                            </div>
+                            <div class="card-body">
+                                <button class="btn btn-primary btn-block mb-md" id="addUserBtn">
+                                    ➕ Add New User
+                                </button>
+
+                                <div id="usersList">
+                                    <div class="text-center text-secondary">
+                                        <div class="spinner" style="margin: 0 auto;"></div>
+                                        <p class="mt-sm">Loading users...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div>
+                        <!-- Translation Settings -->
+                        <div class="card glass-card mb-md slide-in" style="animation-delay: 0.2s;">
+                            <div class="card-header">
+                                <h3 class="card-title">🌐 Translation Settings</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="settingsForm">
+                                    <div class="form-group">
+                                        <label class="form-label" for="service">Translation Service</label>
+                                        <select id="service" class="form-select">
+                                            <option value="AzureOpenAI">Azure OpenAI</option>
+                                            <option value="OpenAI">OpenAI</option>
+                                            <option value="Gemini">Google Gemini</option>
+                                            <option value="Claude">Anthropic Claude</option>
+                                            <option value="DeepL">DeepL</option>
+                                            <option value="GoogleTranslate">Google Translate</option>
+                                            <option value="SiliconFlowFree">SiliconFlow (Free)</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="langFrom">Source Language</label>
+                                        <select id="langFrom" class="form-select">
+                                            <option value="English">English</option>
+                                            <option value="Simplified Chinese">Simplified Chinese</option>
+                                            <option value="Japanese">Japanese</option>
+                                            <option value="Korean">Korean</option>
+                                            <option value="French">French</option>
+                                            <option value="German">German</option>
+                                            <option value="Spanish">Spanish</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="langTo">Target Language</label>
+                                        <select id="langTo" class="form-select">
+                                            <option value="Simplified Chinese">Simplified Chinese</option>
+                                            <option value="English">English</option>
+                                            <option value="Japanese">Japanese</option>
+                                            <option value="Korean">Korean</option>
+                                            <option value="French">French</option>
+                                            <option value="German">German</option>
+                                            <option value="Spanish">Spanish</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group" id="apiKeyGroup">
+                                        <label class="form-label" for="apiKey">API Key</label>
+                                        <input type="password" id="apiKey" class="form-input"
+                                            placeholder="Enter your API key">
+                                        <span class="form-help">Your API key is stored securely and never shared</span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="model">Model</label>
+                                        <input type="text" id="model" class="form-input"
+                                            placeholder="e.g., gpt-4, claude-3-opus">
+                                    </div>
+
+                                    <h4 class="mt-md mb-sm">Advanced Options</h4>
+
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <input type="checkbox" id="noDual">
+                                            Skip bilingual PDF output
+                                        </label>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <input type="checkbox" id="noMono">
+                                            Skip monolingual PDF output
+                                        </label>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <input type="checkbox" id="ignoreCache">
+                                            Ignore translation cache
+                                        </label>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="customPrompt">Custom System Prompt</label>
+                                        <textarea id="customPrompt" class="form-textarea"
+                                            placeholder="Optional: Add custom instructions for the translation model"></textarea>
+                                    </div>
+
+                                    <div class="flex gap-md">
+                                        <button type="submit" class="btn btn-primary flex-1">
+                                            💾 Save Settings
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" id="resetBtn">
+                                            🔄 Reset to Default
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="modal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content card glass-card">
+            <div class="card-header">
+                <h3 class="card-title">Add New User</h3>
+            </div>
+            <div class="card-body">
+                <form id="addUserForm">
+                    <div class="form-group">
+                        <label class="form-label" for="newUsername">Username</label>
+                        <input type="text" id="newUsername" class="form-input" required minlength="3">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="newUserPassword">Password</label>
+                        <input type="password" id="newUserPassword" class="form-input" required minlength="6">
+                    </div>
+
+                    <div id="addUserError" class="form-error" style="display: none;"></div>
+
+                    <div class="flex gap-md">
+                        <button type="submit" class="btn btn-primary flex-1">Create User</button>
+                        <button type="button" class="btn btn-secondary" id="cancelAddUserBtn">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 500px;
+            width: 90%;
+            z-index: 1001;
+            animation: fadeIn 0.3s ease;
+        }
+
+        input[type="checkbox"] {
+            margin-right: var(--spacing-xs);
+        }
+    </style>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        // Require authentication
+        if (!requireAuth()) {
+            // Will redirect to login
+        } else {
+            displayUserInfo();
+            loadSettings();
+            loadUsers();
+        }
+
+        // Logout handler
+        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await api.logout();
+        });
+
+        // Load settings
+        async function loadSettings() {
+            try {
+                const response = await api.getSettings();
+                const settings = response.settings || {};
+
+                // Populate form with settings
+                if (settings.service) document.getElementById('service').value = settings.service;
+                if (settings.lang_from) document.getElementById('langFrom').value = settings.lang_from;
+                if (settings.lang_to) document.getElementById('langTo').value = settings.lang_to;
+                if (settings.api_key) document.getElementById('apiKey').value = settings.api_key;
+                if (settings.model) document.getElementById('model').value = settings.model;
+                if (settings.custom_prompt) document.getElementById('customPrompt').value = settings.custom_prompt;
+
+                document.getElementById('noDual').checked = settings.no_dual || false;
+                document.getElementById('noMono').checked = settings.no_mono || false;
+                document.getElementById('ignoreCache').checked = settings.ignore_cache || false;
+            } catch (error) {
+                showError(error);
+            }
+        }
+
+        // Save settings
+        document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const settings = {
+                service: document.getElementById('service').value,
+                lang_from: document.getElementById('langFrom').value,
+                lang_to: document.getElementById('langTo').value,
+                api_key: document.getElementById('apiKey').value,
+                model: document.getElementById('model').value,
+                custom_prompt: document.getElementById('customPrompt').value,
+                no_dual: document.getElementById('noDual').checked,
+                no_mono: document.getElementById('noMono').checked,
+                ignore_cache: document.getElementById('ignoreCache').checked,
+            };
+
+            showLoading('Saving settings...');
+
+            try {
+                await api.updateSettings(settings);
+                hideLoading();
+                showSuccess('Settings saved successfully!');
+            } catch (error) {
+                hideLoading();
+                showError(error);
+            }
+        });
+
+        // Reset settings
+        document.getElementById('resetBtn').addEventListener('click', async () => {
+            if (!confirm('Are you sure you want to reset all settings to default?')) {
+                return;
+            }
+
+            showLoading('Resetting settings...');
+
+            try {
+                await api.resetSettings();
+                hideLoading();
+                showSuccess('Settings reset to default');
+                loadSettings();
+            } catch (error) {
+                hideLoading();
+                showError(error);
+            }
+        });
+
+        // Change password
+        document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorDiv = document.getElementById('passwordError');
+
+            if (newPassword !== confirmPassword) {
+                errorDiv.textContent = 'New passwords do not match';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            errorDiv.style.display = 'none';
+            showLoading('Changing password...');
+
+            try {
+                await api.changePassword(currentPassword, newPassword);
+                hideLoading();
+                showSuccess('Password changed successfully!');
+                document.getElementById('passwordForm').reset();
+            } catch (error) {
+                hideLoading();
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+            }
+        });
+
+        // Load users (admin only)
+        async function loadUsers() {
+            const user = getCurrentUser();
+            if (!user || !user.is_admin) return;
+
+            try {
+                const response = await api.listUsers();
+                const users = response.users || [];
+
+                const usersList = document.getElementById('usersList');
+                usersList.innerHTML = users.map(u => `
+          <div class="card mb-sm">
+            <div class="flex flex-between">
+              <div>
+                <strong>${u.username}</strong>
+                ${u.is_admin ? '<span class="badge">Admin</span>' : ''}
+                <div class="text-secondary" style="font-size: var(--font-size-xs);">
+                  Created: ${formatDate(u.created_at)}
+                </div>
+              </div>
+              ${!u.is_admin ? `
+                <button class="btn btn-sm btn-danger" onclick="deleteUser('${u.username}')">
+                  Delete
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `).join('');
+            } catch (error) {
+                console.error('Failed to load users:', error);
+            }
+        }
+
+        // Add user modal
+        document.getElementById('addUserBtn').addEventListener('click', () => {
+            document.getElementById('addUserModal').style.display = 'flex';
+        });
+
+        document.getElementById('cancelAddUserBtn').addEventListener('click', () => {
+            document.getElementById('addUserModal').style.display = 'none';
+            document.getElementById('addUserForm').reset();
+        });
+
+        // Add user form
+        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newUserPassword').value;
+            const errorDiv = document.getElementById('addUserError');
+
+            errorDiv.style.display = 'none';
+            showLoading('Creating user...');
+
+            try {
+                await api.register(username, password);
+                hideLoading();
+                showSuccess(`User '${username}' created successfully!`);
+                document.getElementById('addUserModal').style.display = 'none';
+                document.getElementById('addUserForm').reset();
+                loadUsers();
+            } catch (error) {
+                hideLoading();
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+            }
+        });
+
+        // Delete user
+        async function deleteUser(username) {
+            if (!confirm(`Are you sure you want to delete user '${username}'?`)) {
+                return;
+            }
+
+            showLoading('Deleting user...');
+
+            try {
+                await api.deleteUser(username);
+                hideLoading();
+                showSuccess(`User '${username}' deleted successfully`);
+                loadUsers();
+            } catch (error) {
+                hideLoading();
+                showError(error);
+            }
+        }
+    </script>
+</body>
+
+</html>

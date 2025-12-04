@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload - PDFMathTranslate</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="page-wrapper">
+        <!-- Header -->
+        <header class="header">
+            <nav class="nav container">
+                <div class="logo">PDFMathTranslate</div>
+                <ul class="nav-links">
+                    <li><a href="/upload.html" class="nav-link active">Upload</a></li>
+                    <li><a href="/settings.html" class="nav-link">Settings</a></li>
+                    <li><span class="nav-link" data-username></span></li>
+                    <li><a href="#" class="nav-link" id="logoutBtn">Logout</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <div class="text-center mb-lg">
+                    <h1 class="fade-in">Translate Your PDF</h1>
+                    <p class="text-secondary">Upload a PDF file or provide a URL to start translation</p>
+                </div>
+
+                <!-- Upload Section -->
+                <div class="grid grid-2 mb-lg">
+                    <!-- File Upload -->
+                    <div class="card slide-in">
+                        <div class="card-header">
+                            <h3 class="card-title">📄 Upload File</h3>
+                            <p class="card-subtitle">Drag and drop or click to select</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="upload-zone" id="uploadZone">
+                                <div class="upload-icon">📁</div>
+                                <div class="upload-text">Drop PDF file here</div>
+                                <div class="upload-hint">or click to browse</div>
+                                <input type="file" id="fileInput" accept=".pdf" style="display: none;">
+                            </div>
+
+                            <div id="fileInfo" class="mt-md" style="display: none;">
+                                <div class="flex flex-between">
+                                    <span id="fileName"></span>
+                                    <span id="fileSize"></span>
+                                </div>
+                                <div class="progress-bar mt-sm">
+                                    <div class="progress-fill" id="uploadProgress" style="width: 0%"></div>
+                                </div>
+                                <div id="uploadStatus" class="text-center mt-sm text-secondary"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- URL Input -->
+                    <div class="card slide-in" style="animation-delay: 0.1s;">
+                        <div class="card-header">
+                            <h3 class="card-title">🔗 From URL</h3>
+                            <p class="card-subtitle">Provide a direct link to PDF</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label" for="urlInput">PDF URL</label>
+                                <input type="url" id="urlInput" class="form-input"
+                                    placeholder="https://example.com/document.pdf">
+                            </div>
+                            <button class="btn btn-primary btn-block" id="urlUploadBtn">
+                                Download & Translate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Translation Status -->
+                <div id="translationSection" style="display: none;">
+                    <div class="card glass-card">
+                        <div class="card-header">
+                            <h3 class="card-title">⚡ Translation Progress</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="flex flex-between mb-sm">
+                                <span id="translationStatus">Initializing...</span>
+                                <span id="translationProgress">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="translationProgressBar" style="width: 0%"></div>
+                            </div>
+                            <div id="translationMessage" class="text-secondary mt-sm"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Translation Results -->
+                <div id="resultsSection" style="display: none;">
+                    <div class="card glass-card mt-md">
+                        <div class="card-header">
+                            <h3 class="card-title">✅ Translation Complete!</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="grid grid-2 gap-md">
+                                <button class="btn btn-success" id="downloadMonoBtn">
+                                    📥 Download Translated PDF
+                                </button>
+                                <button class="btn btn-primary" id="downloadDualBtn">
+                                    📥 Download Bilingual PDF
+                                </button>
+                            </div>
+                            <button class="btn btn-secondary btn-block mt-md" id="newTranslationBtn">
+                                🔄 Translate Another File
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Translation History -->
+                <div class="mt-xl">
+                    <h2 class="mb-md">📚 Recent Translations</h2>
+                    <div id="historyList">
+                        <div class="text-center text-secondary">
+                            <p>No translation history yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        // Require authentication
+        if (!requireAuth()) {
+            // Will redirect to login
+        } else {
+            displayUserInfo();
+            loadHistory();
+        }
+
+        let currentFileId = null;
+        let currentTaskId = null;
+        let statusCheckInterval = null;
+
+        // Logout handler
+        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await api.logout();
+        });
+
+        // File upload zone
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('drag-over');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('drag-over');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('drag-over');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileUpload(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+
+        // Handle file upload
+        async function handleFileUpload(file) {
+            if (!file.name.endsWith('.pdf')) {
+                showError(new Error('Please select a PDF file'));
+                return;
+            }
+
+            document.getElementById('fileInfo').style.display = 'block';
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('uploadStatus').textContent = 'Uploading...';
+
+            try {
+                const response = await api.uploadFile(file, (progress) => {
+                    document.getElementById('uploadProgress').style.width = progress + '%';
+                });
+
+                currentFileId = response.file_id;
+                document.getElementById('uploadStatus').textContent = 'Upload complete! Starting translation...';
+
+                // Start translation with default settings
+                await startTranslation();
+            } catch (error) {
+                showError(error);
+                document.getElementById('uploadStatus').textContent = 'Upload failed';
+            }
+        }
+
+        // Start translation
+        async function startTranslation() {
+            try {
+                // Get user settings
+                const settingsResponse = await api.getSettings();
+                const settings = settingsResponse.settings || {};
+
+                // Start translation
+                const response = await api.startTranslation(currentFileId, settings);
+                currentTaskId = response.task_id;
+
+                // Show translation section
+                document.getElementById('translationSection').style.display = 'block';
+
+                // Start polling for status
+                statusCheckInterval = setInterval(checkTranslationStatus, 2000);
+            } catch (error) {
+                showError(error);
+            }
+        }
+
+        // Check translation status
+        async function checkTranslationStatus() {
+            try {
+                const response = await api.getTranslationStatus(currentTaskId);
+                const task = response.task;
+
+                document.getElementById('translationStatus').textContent = task.status;
+                document.getElementById('translationProgress').textContent = task.progress + '%';
+                document.getElementById('translationProgressBar').style.width = task.progress + '%';
+                document.getElementById('translationMessage').textContent = task.message;
+
+                if (task.status === 'completed') {
+                    clearInterval(statusCheckInterval);
+                    showTranslationComplete();
+                } else if (task.status === 'failed') {
+                    clearInterval(statusCheckInterval);
+                    showError(new Error(task.message));
+                }
+            } catch (error) {
+                clearInterval(statusCheckInterval);
+                showError(error);
+            }
+        }
+
+        // Show translation complete
+        function showTranslationComplete() {
+            document.getElementById('translationSection').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+            showSuccess('Translation completed successfully!');
+            loadHistory();
+        }
+
+        // Download handlers
+        document.getElementById('downloadMonoBtn').addEventListener('click', () => {
+            window.open(api.getDownloadUrl(currentTaskId, 'mono'), '_blank');
+        });
+
+        document.getElementById('downloadDualBtn').addEventListener('click', () => {
+            window.open(api.getDownloadUrl(currentTaskId, 'dual'), '_blank');
+        });
+
+        document.getElementById('newTranslationBtn').addEventListener('click', () => {
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('fileInfo').style.display = 'none';
+            document.getElementById('uploadProgress').style.width = '0%';
+            fileInput.value = '';
+            currentFileId = null;
+            currentTaskId = null;
+        });
+
+        // Load translation history
+        async function loadHistory() {
+            try {
+                const response = await api.getTranslationHistory();
+                const history = response.history || [];
+
+                const historyList = document.getElementById('historyList');
+
+                if (history.length === 0) {
+                    historyList.innerHTML = '<div class="text-center text-secondary"><p>No translation history yet</p></div>';
+                    return;
+                }
+
+                historyList.innerHTML = history.slice(0, 5).map(item => `
+          <div class="card mb-sm">
+            <div class="flex flex-between">
+              <div>
+                <strong>${item.filename}</strong>
+                <div class="text-secondary" style="font-size: var(--font-size-sm);">
+                  ${formatDate(item.created_at)}
+                </div>
+              </div>
+              <div>
+                <span class="badge">${item.status}</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+            } catch (error) {
+                console.error('Failed to load history:', error);
+            }
+        }
+    </script>
+</body>
+
+</html>
