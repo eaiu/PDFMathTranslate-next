@@ -22,7 +22,7 @@ dependencies = [
     "pymupdf<1.25.3",
     "tqdm",
     "tenacity",
-    "numpy>=1.20,<2.0",  # Constrain to NumPy 1.x for compatibility
+    "numpy",  # Constrain to NumPy 1.x for compatibility
     "ollama",
     "xinference-client",
     "deepl",
