@@ -92,14 +92,17 @@ async def main() -> int:
         # Check if user wants the new web UI
         if os.environ.get('PDF2ZH_WEB_UI') == '1' or '--web-ui' in sys.argv:
             logger.info("Starting new Web UI with authentication...")
-            import uvicorn
             from pdf2zh_next.web_api import app
             
             port = settings.gui_settings.server_port
             logger.info(f"Web UI will be available at http://localhost:{port}")
             logger.info("Use the original Gradio UI by removing --web-ui flag")
             
-            uvicorn.run(app, host="0.0.0.0", port=port)
+            # Use async-compatible uvicorn server
+            import uvicorn
+            config = uvicorn.Config(app, host="0.0.0.0", port=port, log_level="info")
+            server = uvicorn.Server(config)
+            await server.serve()
             return 0
         
         # Original Gradio UI
