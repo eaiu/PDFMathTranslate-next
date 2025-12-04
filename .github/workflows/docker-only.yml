@@ -13,7 +13,7 @@ permissions:
 env:
   REGISTRY: ghcr.io
   GHCR_REPO: ghcr.io/${{ github.repository }}
-  DOCKERHUB_REPO: eaiu/GbabelDoc
+  DOCKERHUB_REPO: eaiu/gbabeldocwebui
   WIN_EXE_PYTHON_VERSION: "3.13.3"
 
 jobs:
