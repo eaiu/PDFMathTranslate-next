@@ -15,7 +15,7 @@ env:
   REGISTRY: ghcr.io
   REPO_LOWER: ${{ github.repository_owner }}/${{ github.event.repository.name }}
   GHCR_REPO: ghcr.io/${{ github.repository }}
-  DOCKERHUB_REPO: awwaawwa/pdfmathtranslate-next
+  DOCKERHUB_REPO: eaiu/GbabelDoc
   WIN_EXE_PYTHON_VERSION: "3.13.3"
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       # debug purpose
-      is_main_repo: ${{ github.repository == 'PDFMathTranslate/PDFMathTranslate-next' }}
+      is_main_repo: true
     steps:
       - run: echo "Running repository check"
 

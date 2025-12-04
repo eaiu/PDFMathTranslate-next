@@ -24,6 +24,7 @@ This is the new multi-user web interface for PDFMathTranslate with authenticatio
 - Real-time progress tracking
 - Translation history
 
+
 ⚙️ **Settings (Page 2)**
 - User password management
 - Translation service configuration
