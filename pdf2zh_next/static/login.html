@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - PDFMathTranslate</title>
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/static/css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
   <div class="page-wrapper flex flex-center">
     <div class="container" style="max-width: 480px;">
@@ -28,39 +30,22 @@
 
             <div class="form-group">
               <label class="form-label" for="setupUsername">Username</label>
-              <input 
-                type="text" 
-                id="setupUsername" 
-                class="form-input" 
-                placeholder="Enter username"
-                required
-                minlength="3"
-              >
+              <input type="text" id="setupUsername" class="form-input" placeholder="Enter username" required
+                minlength="3">
               <span class="form-help">At least 3 characters</span>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="setupPassword">Password</label>
-              <input 
-                type="password" 
-                id="setupPassword" 
-                class="form-input" 
-                placeholder="Enter password"
-                required
-                minlength="6"
-              >
+              <input type="password" id="setupPassword" class="form-input" placeholder="Enter password" required
+                minlength="6">
               <span class="form-help">At least 6 characters</span>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="setupPasswordConfirm">Confirm Password</label>
-              <input 
-                type="password" 
-                id="setupPasswordConfirm" 
-                class="form-input" 
-                placeholder="Confirm password"
-                required
-              >
+              <input type="password" id="setupPasswordConfirm" class="form-input" placeholder="Confirm password"
+                required>
             </div>
 
             <div id="setupError" class="form-error" style="display: none;"></div>
@@ -74,24 +59,12 @@
           <form id="loginForm">
             <div class="form-group">
               <label class="form-label" for="username">Username</label>
-              <input 
-                type="text" 
-                id="username" 
-                class="form-input" 
-                placeholder="Enter your username"
-                required
-              >
+              <input type="text" id="username" class="form-input" placeholder="Enter your username" required>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="password">Password</label>
-              <input 
-                type="password" 
-                id="password" 
-                class="form-input" 
-                placeholder="Enter your password"
-                required
-              >
+              <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
             </div>
 
             <div id="loginError" class="form-error" style="display: none;"></div>
@@ -111,8 +84,8 @@
     </div>
   </div>
 
-  <script src="/js/api.js"></script>
-  <script src="/js/auth.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/auth.js"></script>
   <script>
     // Check if already authenticated
     if (redirectIfAuthenticated()) {
@@ -125,7 +98,7 @@
     async function checkSetupStatus() {
       try {
         const status = await api.checkAuthStatus();
-        
+
         if (status.setup_required) {
           // Show setup form
           document.getElementById('setupForm').style.display = 'block';
@@ -145,25 +118,25 @@
     // Setup form submission
     document.getElementById('setupForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       const username = document.getElementById('setupUsername').value;
       const password = document.getElementById('setupPassword').value;
       const passwordConfirm = document.getElementById('setupPasswordConfirm').value;
       const errorDiv = document.getElementById('setupError');
-      
+
       // Validate passwords match
       if (password !== passwordConfirm) {
         errorDiv.textContent = 'Passwords do not match';
         errorDiv.style.display = 'block';
         return;
       }
-      
+
       errorDiv.style.display = 'none';
       showLoading('Creating admin account...');
-      
+
       try {
         const response = await api.setup(username, password);
-        
+
         if (response.success) {
           hideLoading();
           showSuccess('Admin account created successfully!');
@@ -181,17 +154,17 @@
     // Login form submission
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
       const errorDiv = document.getElementById('loginError');
-      
+
       errorDiv.style.display = 'none';
       showLoading('Logging in...');
-      
+
       try {
         const response = await api.login(username, password);
-        
+
         if (response.success) {
           hideLoading();
           showSuccess('Login successful!');
@@ -207,4 +180,5 @@
     });
   </script>
 </body>
+
 </html>
