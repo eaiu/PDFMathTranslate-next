@@ -5,130 +5,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload - PDFMathTranslate</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 
 <body>
     <div class="page-wrapper">
         <!-- Header -->
         <header class="header">
-            <nav class="nav container">
-                <div class="logo">PDFMathTranslate</div>
-                <ul class="nav-links">
-                    <li><a href="/upload.html" class="nav-link active">Upload</a></li>
-                    <li><a href="/settings.html" class="nav-link">Settings</a></li>
-                    <li><span class="nav-link" data-username></span></li>
-                    <li><a href="#" class="nav-link" id="logoutBtn">Logout</a></li>
-                </ul>
-            </nav>
+            <div class="container">
+                <nav class="nav">
+                    <div class="logo">PDFMathTranslate</div>
+                    <ul class="nav-links">
+                        <li><a href="/static/upload.html" class="nav-link active">Upload</a></li>
+                        <li><a href="/static/settings.html" class="nav-link">Settings</a></li>
+                        <li><a href="#" class="nav-link" id="user-info"></a></li>
+                        <li><a href="#" class="nav-link" id="logout-btn">Logout</a></li>
+                    </ul>
+                </nav>
+            </div>
         </header>
 
         <!-- Main Content -->
         <main class="main-content">
             <div class="container">
-                <div class="text-center mb-lg">
-                    <h1 class="fade-in">Translate Your PDF</h1>
-                    <p class="text-secondary">Upload a PDF file or provide a URL to start translation</p>
-                </div>
-
-                <!-- Upload Section -->
-                <div class="grid grid-2 mb-lg">
-                    <!-- File Upload -->
-                    <div class="card slide-in">
-                        <div class="card-header">
-                            <h3 class="card-title">📄 Upload File</h3>
-                            <p class="card-subtitle">Drag and drop or click to select</p>
-                        </div>
-                        <div class="card-body">
-                            <div class="upload-zone" id="uploadZone">
-                                <div class="upload-icon">📁</div>
-                                <div class="upload-text">Drop PDF file here</div>
-                                <div class="upload-hint">or click to browse</div>
-                                <input type="file" id="fileInput" accept=".pdf" style="display: none;">
+                <div class="grid grid-2">
+                    <!-- Upload Section -->
+                    <div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Upload PDF</h2>
+                                <p class="card-subtitle">Upload a file or enter a URL to translate</p>
                             </div>
 
-                            <div id="fileInfo" class="mt-md" style="display: none;">
-                                <div class="flex flex-between">
-                                    <span id="fileName"></span>
-                                    <span id="fileSize"></span>
+                            <div class="card-body">
+                                <!-- Upload Zone -->
+                                <div class="upload-zone" id="upload-zone">
+                                    <div class="upload-icon">📄</div>
+                                    <p class="upload-text">Drag and drop your PDF here</p>
+                                    <p class="upload-hint">or click to browse</p>
+                                    <input type="file" id="file-input" accept=".pdf" style="display: none;">
                                 </div>
-                                <div class="progress-bar mt-sm">
-                                    <div class="progress-fill" id="uploadProgress" style="width: 0%"></div>
+
+                                <div class="text-center mt-md mb-md">
+                                    <span class="text-muted">— OR —</span>
                                 </div>
-                                <div id="uploadStatus" class="text-center mt-sm text-secondary"></div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- URL Input -->
-                    <div class="card slide-in" style="animation-delay: 0.1s;">
-                        <div class="card-header">
-                            <h3 class="card-title">🔗 From URL</h3>
-                            <p class="card-subtitle">Provide a direct link to PDF</p>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label class="form-label" for="urlInput">PDF URL</label>
-                                <input type="url" id="urlInput" class="form-input"
-                                    placeholder="https://example.com/document.pdf">
-                            </div>
-                            <button class="btn btn-primary btn-block" id="urlUploadBtn">
-                                Download & Translate
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                                <!-- URL Input -->
+                                <div class="form-group">
+                                    <label class="form-label">PDF URL</label>
+                                    <input type="url" class="form-input" id="url-input"
+                                        placeholder="https://example.com/document.pdf">
+                                </div>
 
-                <!-- Translation Status -->
-                <div id="translationSection" style="display: none;">
-                    <div class="card glass-card">
-                        <div class="card-header">
-                            <h3 class="card-title">⚡ Translation Progress</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="flex flex-between mb-sm">
-                                <span id="translationStatus">Initializing...</span>
-                                <span id="translationProgress">0%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="translationProgressBar" style="width: 0%"></div>
-                            </div>
-                            <div id="translationMessage" class="text-secondary mt-sm"></div>
-                        </div>
-                    </div>
-                </div>
+                                <!-- Page Selection -->
+                                <div class="form-group">
+                                    <label class="form-label">Pages to Translate</label>
+                                    <select class="form-select" id="page-range-select">
+                                        <option value="all">All Pages</option>
+                                        <option value="first">First Page Only</option>
+                                        <option value="first5">First 5 Pages</option>
+                                        <option value="custom">Custom Range</option>
+                                    </select>
+                                </div>
 
-                <!-- Translation Results -->
-                <div id="resultsSection" style="display: none;">
-                    <div class="card glass-card mt-md">
-                        <div class="card-header">
-                            <h3 class="card-title">✅ Translation Complete!</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="grid grid-2 gap-md">
-                                <button class="btn btn-success" id="downloadMonoBtn">
-                                    📥 Download Translated PDF
-                                </button>
-                                <button class="btn btn-primary" id="downloadDualBtn">
-                                    📥 Download Bilingual PDF
+                                <div class="form-group" id="custom-pages-group" style="display: none;">
+                                    <label class="form-label">Custom Pages</label>
+                                    <input type="text" class="form-input" id="custom-pages-input"
+                                        placeholder="e.g., 1-5,10,15-20">
+                                    <small class="form-help">Enter page numbers or ranges separated by commas</small>
+                                </div>
+
+                                <!-- Translate Button -->
+                                <button class="btn btn-primary btn-block btn-lg" id="translate-btn" disabled>
+                                    Translate
                                 </button>
                             </div>
-                            <button class="btn btn-secondary btn-block mt-md" id="newTranslationBtn">
-                                🔄 Translate Another File
-                            </button>
+                        </div>
+
+                        <!-- Progress Card -->
+                        <div class="card mt-lg" id="progress-card" style="display: none;">
+                            <div class="card-header">
+                                <h3 class="card-title">Translation Progress</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="progress-bar mb-md">
+                                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                                </div>
+                                <p id="progress-text" class="text-center text-muted">Initializing...</p>
+                                <p id="progress-detail" class="text-center"
+                                    style="font-size: 0.875rem; color: var(--text-muted);"></p>
+                            </div>
+                        </div>
+
+                        <!-- Result Card -->
+                        <div class="card mt-lg" id="result-card" style="display: none;">
+                            <div class="card-header">
+                                <h3 class="card-title">Translation Complete!</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="flex gap-md">
+                                    <button class="btn btn-success flex-1" id="download-mono-btn"
+                                        style="display: none;">
+                                        📥 Download Translation Only
+                                    </button>
+                                    <button class="btn btn-success flex-1" id="download-dual-btn"
+                                        style="display: none;">
+                                        📥 Download Bilingual
+                                    </button>
+                                </div>
+                                <button class="btn btn-secondary btn-block mt-md" id="new-translation-btn">
+                                    Start New Translation
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Translation History -->
-                <div class="mt-xl">
-                    <h2 class="mb-md">📚 Recent Translations</h2>
-                    <div id="historyList">
-                        <div class="text-center text-secondary">
-                            <p>No translation history yet</p>
+                    <!-- History Section -->
+                    <div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Translation History</h2>
+                                <p class="card-subtitle">Your recent translations</p>
+                            </div>
+                            <div class="card-body">
+                                <div id="history-list">
+                                    <p class="text-center text-muted">No translations yet</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -136,30 +139,30 @@
         </main>
     </div>
 
-    <script src="/js/api.js"></script>
-    <script src="/js/auth.js"></script>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p class="loading-text">Loading...</p>
+        </div>
+    </div>
+
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/api.js"></script>
     <script>
-        // Require authentication
-        if (!requireAuth()) {
-            // Will redirect to login
-        } else {
-            displayUserInfo();
-            loadHistory();
-        }
-
-        let currentFileId = null;
+        let currentFile = null;
         let currentTaskId = null;
-        let statusCheckInterval = null;
+        let progressInterval = null;
 
-        // Logout handler
-        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
-            e.preventDefault();
-            await api.logout();
+        // Page range selection
+        document.getElementById('page-range-select').addEventListener('change', (e) => {
+            const customGroup = document.getElementById('custom-pages-group');
+            customGroup.style.display = e.target.value === 'custom' ? 'block' : 'none';
         });
 
-        // File upload zone
-        const uploadZone = document.getElementById('uploadZone');
-        const fileInput = document.getElementById('fileInput');
+        // Upload zone
+        const uploadZone = document.getElementById('upload-zone');
+        const fileInput = document.getElementById('file-input');
 
         uploadZone.addEventListener('click', () => fileInput.click());
 
@@ -177,148 +180,204 @@
             uploadZone.classList.remove('drag-over');
 
             const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFileUpload(files[0]);
+            if (files.length > 0 && files[0].type === 'application/pdf') {
+                handleFileSelect(files[0]);
+            } else {
+                showAlert('Please drop a PDF file', 'error');
             }
         });
 
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
-                handleFileUpload(e.target.files[0]);
+                handleFileSelect(e.target.files[0]);
             }
         });
 
-        // Handle file upload
-        async function handleFileUpload(file) {
-            if (!file.name.endsWith('.pdf')) {
-                showError(new Error('Please select a PDF file'));
-                return;
-            }
-
-            document.getElementById('fileInfo').style.display = 'block';
-            document.getElementById('fileName').textContent = file.name;
-            document.getElementById('fileSize').textContent = formatFileSize(file.size);
-            document.getElementById('uploadStatus').textContent = 'Uploading...';
-
-            try {
-                const response = await api.uploadFile(file, (progress) => {
-                    document.getElementById('uploadProgress').style.width = progress + '%';
-                });
-
-                currentFileId = response.file_id;
-                document.getElementById('uploadStatus').textContent = 'Upload complete! Starting translation...';
-
-                // Start translation with default settings
-                await startTranslation();
-            } catch (error) {
-                showError(error);
-                document.getElementById('uploadStatus').textContent = 'Upload failed';
-            }
+        function handleFileSelect(file) {
+            currentFile = file;
+            document.getElementById('translate-btn').disabled = false;
+            uploadZone.querySelector('.upload-text').textContent = file.name;
+            uploadZone.querySelector('.upload-hint').textContent = `${formatFileSize(file.size)} - Click to change`;
         }
 
-        // Start translation
-        async function startTranslation() {
+        // URL input
+        document.getElementById('url-input').addEventListener('input', (e) => {
+            const hasUrl = e.target.value.trim().length > 0;
+            document.getElementById('translate-btn').disabled = !hasUrl && !currentFile;
+            if (hasUrl) {
+                currentFile = null;
+                fileInput.value = '';
+            }
+        });
+
+        // Translate button
+        document.getElementById('translate-btn').addEventListener('click', async () => {
+            const urlInput = document.getElementById('url-input').value.trim();
+            const pageRange = document.getElementById('page-range-select').value;
+            const customPages = document.getElementById('custom-pages-input').value.trim();
+
             try {
-                // Get user settings
-                const settingsResponse = await api.getSettings();
-                const settings = settingsResponse.settings || {};
+                showLoading();
+
+                let uploadedFilePath;
+
+                if (currentFile) {
+                    // Upload file
+                    uploadedFilePath = await api.uploadFile(currentFile, (progress) => {
+                        console.log(`Upload progress: ${progress}%`);
+                    });
+                } else if (urlInput) {
+                    // Use URL
+                    uploadedFilePath = urlInput;
+                } else {
+                    throw new Error('Please select a file or enter a URL');
+                }
+
+                // Get page selection
+                let pages = null;
+                if (pageRange === 'custom' && customPages) {
+                    pages = customPages;
+                } else if (pageRange === 'first') {
+                    pages = '1';
+                } else if (pageRange === 'first5') {
+                    pages = '1-5';
+                }
 
                 // Start translation
-                const response = await api.startTranslation(currentFileId, settings);
-                currentTaskId = response.task_id;
+                const result = await api.startTranslation(uploadedFilePath, pages);
+                currentTaskId = result.task_id;
 
-                // Show translation section
-                document.getElementById('translationSection').style.display = 'block';
+                // Show progress card
+                document.getElementById('progress-card').style.display = 'block';
+                document.getElementById('result-card').style.display = 'none';
 
-                // Start polling for status
-                statusCheckInterval = setInterval(checkTranslationStatus, 2000);
+                // Start polling for progress
+                startProgressPolling();
+
             } catch (error) {
-                showError(error);
+                showAlert('Translation failed: ' + error.message, 'error');
+            } finally {
+                hideLoading();
             }
-        }
+        });
 
-        // Check translation status
-        async function checkTranslationStatus() {
-            try {
-                const response = await api.getTranslationStatus(currentTaskId);
-                const task = response.task;
+        function startProgressPolling() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+            }
 
-                document.getElementById('translationStatus').textContent = task.status;
-                document.getElementById('translationProgress').textContent = task.progress + '%';
-                document.getElementById('translationProgressBar').style.width = task.progress + '%';
-                document.getElementById('translationMessage').textContent = task.message;
+            progressInterval = setInterval(async () => {
+                try {
+                    const status = await api.getTranslationStatus(currentTaskId);
 
-                if (task.status === 'completed') {
-                    clearInterval(statusCheckInterval);
-                    showTranslationComplete();
-                } else if (task.status === 'failed') {
-                    clearInterval(statusCheckInterval);
-                    showError(new Error(task.message));
+                    // Update progress
+                    const progressFill = document.getElementById('progress-fill');
+                    const progressText = document.getElementById('progress-text');
+                    const progressDetail = document.getElementById('progress-detail');
+
+                    progressFill.style.width = status.progress + '%';
+                    progressText.textContent = status.status;
+                    progressDetail.textContent = status.detail || '';
+
+                    // Check if complete
+                    if (status.status === 'completed') {
+                        clearInterval(progressInterval);
+                        showTranslationResult(status);
+                    } else if (status.status === 'failed') {
+                        clearInterval(progressInterval);
+                        showAlert('Translation failed: ' + (status.error || 'Unknown error'), 'error');
+                        document.getElementById('progress-card').style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error polling status:', error);
+                    clearInterval(progressInterval);
+                    showAlert('Error checking translation status', 'error');
                 }
-            } catch (error) {
-                clearInterval(statusCheckInterval);
-                showError(error);
-            }
+            }, 2000); // Poll every 2 seconds
         }
 
-        // Show translation complete
-        function showTranslationComplete() {
-            document.getElementById('translationSection').style.display = 'none';
-            document.getElementById('resultsSection').style.display = 'block';
-            showSuccess('Translation completed successfully!');
+        function showTranslationResult(status) {
+            document.getElementById('progress-card').style.display = 'none';
+            document.getElementById('result-card').style.display = 'block';
+
+            // Show download buttons based on available files
+            if (status.mono_path) {
+                const monoBtn = document.getElementById('download-mono-btn');
+                monoBtn.style.display = 'block';
+                monoBtn.onclick = () => downloadFile(status.mono_path);
+            }
+
+            if (status.dual_path) {
+                const dualBtn = document.getElementById('download-dual-btn');
+                dualBtn.style.display = 'block';
+                dualBtn.onclick = () => downloadFile(status.dual_path);
+            }
+
+            // Reload history
             loadHistory();
         }
 
-        // Download handlers
-        document.getElementById('downloadMonoBtn').addEventListener('click', () => {
-            window.open(api.getDownloadUrl(currentTaskId, 'mono'), '_blank');
-        });
+        function downloadFile(path) {
+            window.open(`/api/translate/download/${currentTaskId}?type=${path.includes('dual') ? 'dual' : 'mono'}`, '_blank');
+        }
 
-        document.getElementById('downloadDualBtn').addEventListener('click', () => {
-            window.open(api.getDownloadUrl(currentTaskId, 'dual'), '_blank');
-        });
-
-        document.getElementById('newTranslationBtn').addEventListener('click', () => {
-            document.getElementById('resultsSection').style.display = 'none';
-            document.getElementById('fileInfo').style.display = 'none';
-            document.getElementById('uploadProgress').style.width = '0%';
-            fileInput.value = '';
-            currentFileId = null;
+        // New translation button
+        document.getElementById('new-translation-btn').addEventListener('click', () => {
+            currentFile = null;
             currentTaskId = null;
+            fileInput.value = '';
+            document.getElementById('url-input').value = '';
+            document.getElementById('translate-btn').disabled = true;
+            document.getElementById('result-card').style.display = 'none';
+            uploadZone.querySelector('.upload-text').textContent = 'Drag and drop your PDF here';
+            uploadZone.querySelector('.upload-hint').textContent = 'or click to browse';
         });
 
         // Load translation history
         async function loadHistory() {
             try {
-                const response = await api.getTranslationHistory();
-                const history = response.history || [];
-
-                const historyList = document.getElementById('historyList');
+                const history = await api.getTranslationHistory();
+                const historyList = document.getElementById('history-list');
 
                 if (history.length === 0) {
-                    historyList.innerHTML = '<div class="text-center text-secondary"><p>No translation history yet</p></div>';
+                    historyList.innerHTML = '<p class="text-center text-muted">No translations yet</p>';
                     return;
                 }
 
-                historyList.innerHTML = history.slice(0, 5).map(item => `
-          <div class="card mb-sm">
-            <div class="flex flex-between">
-              <div>
-                <strong>${item.filename}</strong>
-                <div class="text-secondary" style="font-size: var(--font-size-sm);">
-                  ${formatDate(item.created_at)}
-                </div>
-              </div>
-              <div>
-                <span class="badge">${item.status}</span>
-              </div>
-            </div>
-          </div>
-        `).join('');
+                historyList.innerHTML = history.map(item => `
+                    <div class="card mb-md" style="padding: 1rem;">
+                        <div class="flex flex-between mb-sm">
+                            <strong>${item.filename || 'Untitled'}</strong>
+                            <span class="badge badge-${item.status === 'completed' ? 'success' : item.status === 'failed' ? 'error' : 'warning'}">
+                                ${item.status}
+                            </span>
+                        </div>
+                        <small class="text-muted">${formatDate(item.created_at)}</small>
+                        ${item.status === 'completed' ? `
+                            <div class="flex gap-sm mt-sm">
+                                ${item.mono_path ? `<button class="btn btn-sm btn-secondary" onclick="window.open('/api/translate/download/${item.task_id}?type=mono', '_blank')">📥 Mono</button>` : ''}
+                                ${item.dual_path ? `<button class="btn btn-sm btn-secondary" onclick="window.open('/api/translate/download/${item.task_id}?type=dual', '_blank')">📥 Dual</button>` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
             } catch (error) {
-                console.error('Failed to load history:', error);
+                console.error('Error loading history:', error);
             }
         }
+
+        // Initialize
+        async function init() {
+            try {
+                await requireAuth();
+                await updateUserInfo();
+                await loadHistory();
+            } catch (error) {
+                console.error('Initialization error:', error);
+            }
+        }
+
+        init();
     </script>
 </body>
 

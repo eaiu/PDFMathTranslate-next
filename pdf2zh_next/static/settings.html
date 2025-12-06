@@ -5,195 +5,535 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - PDFMathTranslate</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 
 <body>
     <div class="page-wrapper">
         <!-- Header -->
         <header class="header">
-            <nav class="nav container">
-                <div class="logo">PDFMathTranslate</div>
-                <ul class="nav-links">
-                    <li><a href="/upload.html" class="nav-link">Upload</a></li>
-                    <li><a href="/settings.html" class="nav-link active">Settings</a></li>
-                    <li><span class="nav-link" data-username></span></li>
-                    <li><a href="#" class="nav-link" id="logoutBtn">Logout</a></li>
-                </ul>
-            </nav>
+            <div class="container">
+                <nav class="nav">
+                    <div class="logo">PDFMathTranslate</div>
+                    <ul class="nav-links">
+                        <li><a href="/static/upload.html" class="nav-link">Upload</a></li>
+                        <li><a href="/static/settings.html" class="nav-link active">Settings</a></li>
+                        <li><a href="#" class="nav-link" id="user-info"></a></li>
+                        <li><a href="#" class="nav-link" id="logout-btn">Logout</a></li>
+                    </ul>
+                </nav>
+            </div>
         </header>
 
         <!-- Main Content -->
         <main class="main-content">
             <div class="container">
-                <h1 class="mb-lg fade-in">⚙️ Settings</h1>
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="card-title">Settings</h1>
+                        <p class="card-subtitle">Configure your translation preferences and account</p>
+                    </div>
 
-                <div class="grid grid-2">
-                    <!-- Left Column -->
-                    <div>
-                        <!-- Account Settings -->
-                        <div class="card glass-card mb-md slide-in">
+                    <!-- Tabs Navigation -->
+                    <div class="tabs-nav">
+                        <button class="tab-button active" data-tab="account">Account</button>
+                        <button class="tab-button" data-tab="basic">Basic Settings</button>
+                        <button class="tab-button" data-tab="pdf-output">PDF Output</button>
+                        <button class="tab-button" data-tab="advanced">Advanced</button>
+                        <button class="tab-button" data-tab="rate-limit">Rate Limiting</button>
+                        <button class="tab-button" data-tab="babeldoc">BabelDOC</button>
+                        <button class="tab-button" data-tab="user-mgmt" id="user-mgmt-tab" style="display: none;">User
+                            Management</button>
+                    </div>
+
+                    <!-- Tab: Account Settings -->
+                    <div class="tab-content active" id="tab-account">
+                        <h3>Account Settings</h3>
+
+                        <div class="form-group">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-input" id="current-username" readonly>
+                        </div>
+
+                        <h4 class="mt-lg">Change Password</h4>
+                        <div class="form-group">
+                            <label class="form-label">Current Password</label>
+                            <input type="password" class="form-input" id="current-password"
+                                placeholder="Enter current password">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">New Password</label>
+                            <input type="password" class="form-input" id="new-password"
+                                placeholder="Enter new password (min 6 characters)">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-input" id="confirm-password"
+                                placeholder="Confirm new password">
+                        </div>
+
+                        <button class="btn btn-primary" id="change-password-btn">Change Password</button>
+                    </div>
+
+                    <!-- Tab: Basic Settings -->
+                    <div class="tab-content" id="tab-basic">
+                        <h3>Translation Service</h3>
+
+                        <div class="form-group">
+                            <label class="form-label">Service</label>
+                            <select class="form-select" id="service">
+                                <option value="AzureOpenAI">Azure OpenAI</option>
+                                <option value="OpenAI">OpenAI</option>
+                                <option value="GoogleGemini">Google Gemini</option>
+                                <option value="DeepL">DeepL</option>
+                                <option value="DeepLX">DeepLX</option>
+                                <option value="Ollama">Ollama</option>
+                                <option value="Bing">Bing</option>
+                                <option value="Google">Google</option>
+                                <option value="Tencent">Tencent</option>
+                                <option value="SiliconFlowFree">SiliconFlow Free</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="api-key-group">
+                            <label class="form-label">API Key</label>
+                            <input type="password" class="form-input" id="api-key" placeholder="Enter your API key">
+                        </div>
+
+                        <div class="form-group" id="model-group">
+                            <label class="form-label">Model</label>
+                            <input type="text" class="form-input" id="model" placeholder="e.g., gpt-4">
+                        </div>
+
+                        <div class="form-group" id="endpoint-group" style="display: none;">
+                            <label class="form-label">Endpoint URL</label>
+                            <input type="text" class="form-input" id="endpoint"
+                                placeholder="e.g., https://api.example.com">
+                        </div>
+
+                        <h3 class="mt-lg">Language Settings</h3>
+
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label class="form-label">Source Language</label>
+                                <select class="form-select" id="lang-from">
+                                    <option value="auto">Auto Detect</option>
+                                    <option value="en">English</option>
+                                    <option value="zh">Chinese</option>
+                                    <option value="ja">Japanese</option>
+                                    <option value="ko">Korean</option>
+                                    <option value="fr">French</option>
+                                    <option value="de">German</option>
+                                    <option value="es">Spanish</option>
+                                    <option value="ru">Russian</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Target Language</label>
+                                <select class="form-select" id="lang-to">
+                                    <option value="zh">Simplified Chinese</option>
+                                    <option value="en">English</option>
+                                    <option value="ja">Japanese</option>
+                                    <option value="ko">Korean</option>
+                                    <option value="fr">French</option>
+                                    <option value="de">German</option>
+                                    <option value="es">Spanish</option>
+                                    <option value="ru">Russian</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <h3 class="mt-lg">Page Selection</h3>
+
+                        <div class="form-group">
+                            <label class="form-label">Page Range</label>
+                            <select class="form-select" id="page-range">
+                                <option value="all">All Pages</option>
+                                <option value="first">First Page</option>
+                                <option value="first5">First 5 Pages</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="custom-pages-group" style="display: none;">
+                            <label class="form-label">Custom Pages</label>
+                            <input type="text" class="form-input" id="custom-pages" placeholder="e.g., 1-5,10,15-20">
+                            <small class="form-help">Enter page numbers or ranges separated by commas</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="ignore-cache">
+                                Ignore Cache
+                            </label>
+                            <small class="form-help">Force re-translation even if cached results exist</small>
+                        </div>
+
+                        <button class="btn btn-primary btn-block mt-lg" id="save-basic-btn">Save Basic Settings</button>
+                    </div>
+
+                    <!-- Tab: PDF Output Options -->
+                    <div class="tab-content" id="tab-pdf-output">
+                        <h3>PDF Output Options</h3>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="no-mono">
+                                Skip Mono PDF Output
+                            </label>
+                            <small class="form-help">Don't generate translation-only PDF</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="no-dual">
+                                Skip Dual PDF Output
+                            </label>
+                            <small class="form-help">Don't generate bilingual PDF</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="dual-translate-first">
+                                Translation First in Dual PDF
+                            </label>
+                            <small class="form-help">Show translation before original in dual PDF</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="use-alternating-pages">
+                                Use Alternating Pages
+                            </label>
+                            <small class="form-help">Alternate between original and translated pages</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Watermark Mode</label>
+                            <select class="form-select" id="watermark-mode">
+                                <option value="watermarked">Watermarked</option>
+                                <option value="no_watermark">No Watermark</option>
+                                <option value="both">Both</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="only-translated-pages">
+                                Only Include Translated Pages
+                            </label>
+                            <small class="form-help">Exclude pages that weren't translated</small>
+                        </div>
+
+                        <button class="btn btn-primary btn-block mt-lg" id="save-pdf-output-btn">Save PDF Output
+                            Settings</button>
+                    </div>
+
+                    <!-- Tab: Advanced Options -->
+                    <div class="tab-content" id="tab-advanced">
+                        <h3>Advanced Translation Options</h3>
+
+                        <div class="form-group">
+                            <label class="form-label">Custom System Prompt</label>
+                            <textarea class="form-textarea" id="custom-system-prompt"
+                                placeholder="e.g., You are a professional translator..."></textarea>
+                            <small class="form-help">Custom instructions for the translation model</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Minimum Text Length</label>
+                            <input type="number" class="form-input" id="min-text-length" min="0" value="5">
+                            <small class="form-help">Minimum characters required to translate a text block</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Primary Font Family</label>
+                            <select class="form-select" id="primary-font">
+                                <option value="auto">Auto</option>
+                                <option value="serif">Serif</option>
+                                <option value="sans-serif">Sans-serif</option>
+                                <option value="script">Script</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="enable-term-extraction">
+                                Enable Auto Term Extraction
+                            </label>
+                            <small class="form-help">Automatically extract and use domain-specific terms</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="save-glossary">
+                                Save Auto-Extracted Glossary
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">RPC DocLayout Service (Optional)</label>
+                            <input type="text" class="form-input" id="rpc-doclayout" placeholder="http://host:port">
+                            <small class="form-help">Remote document layout analysis service</small>
+                        </div>
+
+                        <h3 class="mt-lg">Advanced PDF Options</h3>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="skip-clean">
+                                Skip Clean (Improve Compatibility)
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="disable-rich-text">
+                                Disable Rich Text Translation
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="enhance-compatibility">
+                                Enhance Compatibility
+                            </label>
+                            <small class="form-help">Auto-enables skip clean and disable rich text</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="split-short-lines">
+                                Force Split Short Lines
+                            </label>
+                        </div>
+
+                        <div class="form-group" id="split-factor-group" style="display: none;">
+                            <label class="form-label">Short Line Split Factor</label>
+                            <input type="range" class="form-input" id="split-factor" min="0.1" max="1.0" step="0.1"
+                                value="0.5">
+                            <small class="form-help">Threshold: <span id="split-factor-value">0.5</span></small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="translate-tables">
+                                Translate Table Text (Experimental)
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="skip-scanned-detection">
+                                Skip Scanned Detection
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="ocr-workaround">
+                                OCR Workaround (Experimental)
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="auto-ocr">
+                                Auto Enable OCR Workaround
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Max Pages Per Part (0 = no limit)</label>
+                            <input type="number" class="form-input" id="max-pages-per-part" min="0" value="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Formula Font Pattern (Regex)</label>
+                            <input type="text" class="form-input" id="formula-font-pattern"
+                                placeholder="e.g., CMMI|CMR">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Formula Char Pattern (Regex)</label>
+                            <input type="text" class="form-input" id="formula-char-pattern"
+                                placeholder="e.g., [∫∬∭∮∯∰∇∆]">
+                        </div>
+
+                        <button class="btn btn-primary btn-block mt-lg" id="save-advanced-btn">Save Advanced
+                            Settings</button>
+                    </div>
+
+                    <!-- Tab: Rate Limiting -->
+                    <div class="tab-content" id="tab-rate-limit">
+                        <h3>Translation Rate Limiting</h3>
+
+                        <div class="form-group">
+                            <label class="form-label">Rate Limit Mode</label>
+                            <select class="form-select" id="rate-limit-mode">
+                                <option value="rpm">RPM (Requests Per Minute)</option>
+                                <option value="concurrent">Concurrent Threads</option>
+                                <option value="custom">Custom (QPS + Workers)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="rpm-group" style="display: none;">
+                            <label class="form-label">Requests Per Minute</label>
+                            <input type="number" class="form-input" id="rpm-input" min="1" value="240">
+                        </div>
+
+                        <div class="form-group" id="concurrent-group" style="display: none;">
+                            <label class="form-label">Concurrent Threads</label>
+                            <input type="number" class="form-input" id="concurrent-threads" min="1" value="40">
+                        </div>
+
+                        <div id="custom-rate-group" style="display: none;">
+                            <div class="form-group">
+                                <label class="form-label">QPS (Queries Per Second)</label>
+                                <input type="number" class="form-input" id="custom-qps" min="1" value="4">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Pool Max Workers</label>
+                                <input type="number" class="form-input" id="custom-workers" min="1" value="40">
+                            </div>
+                        </div>
+
+                        <h3 class="mt-lg">Term Extraction Rate Limiting</h3>
+
+                        <div class="form-group">
+                            <label class="form-label">Term Service</label>
+                            <select class="form-select" id="term-service">
+                                <option value="same">Same as Translation Service</option>
+                                <option value="AzureOpenAI">Azure OpenAI</option>
+                                <option value="OpenAI">OpenAI</option>
+                                <option value="GoogleGemini">Google Gemini</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Term Rate Limit Mode</label>
+                            <select class="form-select" id="term-rate-mode">
+                                <option value="rpm">RPM</option>
+                                <option value="concurrent">Concurrent Threads</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="term-rpm-group" style="display: none;">
+                            <label class="form-label">Term RPM</label>
+                            <input type="number" class="form-input" id="term-rpm" min="1" value="240">
+                        </div>
+
+                        <div class="form-group" id="term-concurrent-group" style="display: none;">
+                            <label class="form-label">Term Concurrent Threads</label>
+                            <input type="number" class="form-input" id="term-concurrent" min="1" value="40">
+                        </div>
+
+                        <div id="term-custom-group" style="display: none;">
+                            <div class="form-group">
+                                <label class="form-label">Term QPS</label>
+                                <input type="number" class="form-input" id="term-qps" min="1" value="4">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Term Pool Workers</label>
+                                <input type="number" class="form-input" id="term-workers" min="1" value="40">
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary btn-block mt-lg" id="save-rate-limit-btn">Save Rate Limit
+                            Settings</button>
+                    </div>
+
+                    <!-- Tab: BabelDOC Options -->
+                    <div class="tab-content" id="tab-babeldoc">
+                        <h3>BabelDOC Advanced Options</h3>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="merge-line-numbers">
+                                Merge Alternating Line Numbers
+                            </label>
+                            <small class="form-help">Handle documents with alternating line numbers</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="remove-formula-lines">
+                                Remove Non-Formula Lines
+                            </label>
+                            <small class="form-help">Remove non-formula lines within paragraph areas</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Non-Formula Line IoU Threshold</label>
+                            <input type="range" class="form-input" id="iou-threshold" min="0" max="1" step="0.05"
+                                value="0.5">
+                            <small class="form-help">Threshold: <span id="iou-threshold-value">0.5</span></small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Figure/Table Protection Threshold</label>
+                            <input type="range" class="form-input" id="protection-threshold" min="0" max="1" step="0.05"
+                                value="0.5">
+                            <small class="form-help">Threshold: <span id="protection-threshold-value">0.5</span></small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="skip-formula-offset">
+                                Skip Formula Offset Calculation
+                            </label>
+                        </div>
+
+                        <button class="btn btn-primary btn-block mt-lg" id="save-babeldoc-btn">Save BabelDOC
+                            Settings</button>
+                    </div>
+
+                    <!-- Tab: User Management (Admin Only) -->
+                    <div class="tab-content" id="tab-user-mgmt">
+                        <h3>User Management</h3>
+
+                        <div class="card mb-lg">
                             <div class="card-header">
-                                <h3 class="card-title">👤 Account Settings</h3>
+                                <h4 class="card-title">Add New User</h4>
                             </div>
                             <div class="card-body">
                                 <div class="form-group">
                                     <label class="form-label">Username</label>
-                                    <input type="text" class="form-input" data-username readonly>
+                                    <input type="text" class="form-input" id="new-user-username"
+                                        placeholder="Enter username">
                                 </div>
 
-                                <h4 class="mt-md mb-sm">Change Password</h4>
-                                <form id="passwordForm">
-                                    <div class="form-group">
-                                        <label class="form-label" for="currentPassword">Current Password</label>
-                                        <input type="password" id="currentPassword" class="form-input" required>
-                                    </div>
+                                <div class="form-group">
+                                    <label class="form-label">Password</label>
+                                    <input type="password" class="form-input" id="new-user-password"
+                                        placeholder="Enter password">
+                                </div>
 
-                                    <div class="form-group">
-                                        <label class="form-label" for="newPassword">New Password</label>
-                                        <input type="password" id="newPassword" class="form-input" required
-                                            minlength="6">
-                                        <span class="form-help">At least 6 characters</span>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="form-label" for="confirmPassword">Confirm New Password</label>
-                                        <input type="password" id="confirmPassword" class="form-input" required>
-                                    </div>
-
-                                    <div id="passwordError" class="form-error" style="display: none;"></div>
-
-                                    <button type="submit" class="btn btn-primary btn-block">
-                                        Update Password
-                                    </button>
-                                </form>
+                                <button class="btn btn-primary" id="add-user-btn">Add User</button>
                             </div>
                         </div>
 
-                        <!-- User Management (Admin Only) -->
-                        <div class="card glass-card mb-md slide-in" data-admin-only
-                            style="display: none; animation-delay: 0.1s;">
+                        <div class="card">
                             <div class="card-header">
-                                <h3 class="card-title">👥 User Management</h3>
+                                <h4 class="card-title">Existing Users</h4>
                             </div>
                             <div class="card-body">
-                                <button class="btn btn-primary btn-block mb-md" id="addUserBtn">
-                                    ➕ Add New User
-                                </button>
-
-                                <div id="usersList">
-                                    <div class="text-center text-secondary">
-                                        <div class="spinner" style="margin: 0 auto;"></div>
-                                        <p class="mt-sm">Loading users...</p>
-                                    </div>
-                                </div>
+                                <div id="users-list"></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Right Column -->
-                    <div>
-                        <!-- Translation Settings -->
-                        <div class="card glass-card mb-md slide-in" style="animation-delay: 0.2s;">
-                            <div class="card-header">
-                                <h3 class="card-title">🌐 Translation Settings</h3>
-                            </div>
-                            <div class="card-body">
-                                <form id="settingsForm">
-                                    <div class="form-group">
-                                        <label class="form-label" for="service">Translation Service</label>
-                                        <select id="service" class="form-select">
-                                            <option value="AzureOpenAI">Azure OpenAI</option>
-                                            <option value="OpenAI">OpenAI</option>
-                                            <option value="Gemini">Google Gemini</option>
-                                            <option value="Claude">Anthropic Claude</option>
-                                            <option value="DeepL">DeepL</option>
-                                            <option value="GoogleTranslate">Google Translate</option>
-                                            <option value="SiliconFlowFree">SiliconFlow (Free)</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="form-label" for="langFrom">Source Language</label>
-                                        <select id="langFrom" class="form-select">
-                                            <option value="English">English</option>
-                                            <option value="Simplified Chinese">Simplified Chinese</option>
-                                            <option value="Japanese">Japanese</option>
-                                            <option value="Korean">Korean</option>
-                                            <option value="French">French</option>
-                                            <option value="German">German</option>
-                                            <option value="Spanish">Spanish</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="form-label" for="langTo">Target Language</label>
-                                        <select id="langTo" class="form-select">
-                                            <option value="Simplified Chinese">Simplified Chinese</option>
-                                            <option value="English">English</option>
-                                            <option value="Japanese">Japanese</option>
-                                            <option value="Korean">Korean</option>
-                                            <option value="French">French</option>
-                                            <option value="German">German</option>
-                                            <option value="Spanish">Spanish</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group" id="apiKeyGroup">
-                                        <label class="form-label" for="apiKey">API Key</label>
-                                        <input type="password" id="apiKey" class="form-input"
-                                            placeholder="Enter your API key">
-                                        <span class="form-help">Your API key is stored securely and never shared</span>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="form-label" for="model">Model</label>
-                                        <input type="text" id="model" class="form-input"
-                                            placeholder="e.g., gpt-4, claude-3-opus">
-                                    </div>
-
-                                    <h4 class="mt-md mb-sm">Advanced Options</h4>
-
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            <input type="checkbox" id="noDual">
-                                            Skip bilingual PDF output
-                                        </label>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            <input type="checkbox" id="noMono">
-                                            Skip monolingual PDF output
-                                        </label>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            <input type="checkbox" id="ignoreCache">
-                                            Ignore translation cache
-                                        </label>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="form-label" for="customPrompt">Custom System Prompt</label>
-                                        <textarea id="customPrompt" class="form-textarea"
-                                            placeholder="Optional: Add custom instructions for the translation model"></textarea>
-                                    </div>
-
-                                    <div class="flex gap-md">
-                                        <button type="submit" class="btn btn-primary flex-1">
-                                            💾 Save Settings
-                                        </button>
-                                        <button type="button" class="btn btn-secondary" id="resetBtn">
-                                            🔄 Reset to Default
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
+                    <!-- Global Actions -->
+                    <div class="card-footer mt-lg">
+                        <div class="flex flex-between">
+                            <button class="btn btn-secondary" id="reset-btn">Reset to Defaults</button>
+                            <button class="btn btn-success" id="save-all-btn">Save All Settings</button>
                         </div>
                     </div>
                 </div>
@@ -201,275 +541,378 @@
         </main>
     </div>
 
-    <!-- Add User Modal -->
-    <div id="addUserModal" class="modal" style="display: none;">
-        <div class="modal-overlay"></div>
-        <div class="modal-content card glass-card">
-            <div class="card-header">
-                <h3 class="card-title">Add New User</h3>
-            </div>
-            <div class="card-body">
-                <form id="addUserForm">
-                    <div class="form-group">
-                        <label class="form-label" for="newUsername">Username</label>
-                        <input type="text" id="newUsername" class="form-input" required minlength="3">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="newUserPassword">Password</label>
-                        <input type="password" id="newUserPassword" class="form-input" required minlength="6">
-                    </div>
-
-                    <div id="addUserError" class="form-error" style="display: none;"></div>
-
-                    <div class="flex gap-md">
-                        <button type="submit" class="btn btn-primary flex-1">Create User</button>
-                        <button type="button" class="btn btn-secondary" id="cancelAddUserBtn">Cancel</button>
-                    </div>
-                </form>
-            </div>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p class="loading-text">Loading...</p>
         </div>
     </div>
 
-    <style>
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            position: relative;
-            max-width: 500px;
-            width: 90%;
-            z-index: 1001;
-            animation: fadeIn 0.3s ease;
-        }
-
-        input[type="checkbox"] {
-            margin-right: var(--spacing-xs);
-        }
-    </style>
-
-    <script src="/js/api.js"></script>
-    <script src="/js/auth.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/api.js"></script>
     <script>
-        // Require authentication
-        if (!requireAuth()) {
-            // Will redirect to login
-        } else {
-            displayUserInfo();
-            loadSettings();
-            loadUsers();
-        }
+        // Tab switching
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.dataset.tab;
 
-        // Logout handler
-        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
-            e.preventDefault();
-            await api.logout();
+                // Update buttons
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                // Update content
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                document.getElementById(`tab-${tabId}`).classList.add('active');
+            });
         });
 
-        // Load settings
+        // Page range selection
+        document.getElementById('page-range').addEventListener('change', (e) => {
+            const customGroup = document.getElementById('custom-pages-group');
+            customGroup.style.display = e.target.value === 'custom' ? 'block' : 'none';
+        });
+
+        // Split short lines toggle
+        document.getElementById('split-short-lines').addEventListener('change', (e) => {
+            document.getElementById('split-factor-group').style.display = e.target.checked ? 'block' : 'none';
+        });
+
+        // Split factor slider
+        document.getElementById('split-factor').addEventListener('input', (e) => {
+            document.getElementById('split-factor-value').textContent = e.target.value;
+        });
+
+        // IoU threshold slider
+        document.getElementById('iou-threshold').addEventListener('input', (e) => {
+            document.getElementById('iou-threshold-value').textContent = e.target.value;
+        });
+
+        // Protection threshold slider
+        document.getElementById('protection-threshold').addEventListener('input', (e) => {
+            document.getElementById('protection-threshold-value').textContent = e.target.value;
+        });
+
+        // Rate limit mode selection
+        document.getElementById('rate-limit-mode').addEventListener('change', (e) => {
+            const mode = e.target.value;
+            document.getElementById('rpm-group').style.display = mode === 'rpm' ? 'block' : 'none';
+            document.getElementById('concurrent-group').style.display = mode === 'concurrent' ? 'block' : 'none';
+            document.getElementById('custom-rate-group').style.display = mode === 'custom' ? 'block' : 'none';
+        });
+
+        // Term rate limit mode selection
+        document.getElementById('term-rate-mode').addEventListener('change', (e) => {
+            const mode = e.target.value;
+            document.getElementById('term-rpm-group').style.display = mode === 'rpm' ? 'block' : 'none';
+            document.getElementById('term-concurrent-group').style.display = mode === 'concurrent' ? 'block' : 'none';
+            document.getElementById('term-custom-group').style.display = mode === 'custom' ? 'block' : 'none';
+        });
+
+        // Initialize on page load
+        async function init() {
+            try {
+                await requireAuth();
+                const userInfo = await updateUserInfo();
+
+                // Show user management tab for admins
+                if (userInfo.is_admin) {
+                    document.getElementById('user-mgmt-tab').style.display = 'block';
+                }
+
+                // Load settings
+                await loadSettings();
+
+                // Load users list if admin
+                if (userInfo.is_admin) {
+                    await loadUsers();
+                }
+            } catch (error) {
+                console.error('Initialization error:', error);
+            }
+        }
+
         async function loadSettings() {
+            showLoading();
             try {
-                const response = await api.getSettings();
-                const settings = response.settings || {};
+                const settings = await api.getSettings();
 
-                // Populate form with settings
-                if (settings.service) document.getElementById('service').value = settings.service;
-                if (settings.lang_from) document.getElementById('langFrom').value = settings.lang_from;
-                if (settings.lang_to) document.getElementById('langTo').value = settings.lang_to;
-                if (settings.api_key) document.getElementById('apiKey').value = settings.api_key;
-                if (settings.model) document.getElementById('model').value = settings.model;
-                if (settings.custom_prompt) document.getElementById('customPrompt').value = settings.custom_prompt;
+                // Populate all form fields
+                // Basic settings
+                document.getElementById('service').value = settings.service || 'AzureOpenAI';
+                document.getElementById('api-key').value = settings.api_key || '';
+                document.getElementById('model').value = settings.model || '';
+                document.getElementById('lang-from').value = settings.lang_from || 'auto';
+                document.getElementById('lang-to').value = settings.lang_to || 'zh';
+                document.getElementById('page-range').value = settings.page_range || 'all';
+                document.getElementById('ignore-cache').checked = settings.ignore_cache || false;
 
-                document.getElementById('noDual').checked = settings.no_dual || false;
-                document.getElementById('noMono').checked = settings.no_mono || false;
-                document.getElementById('ignoreCache').checked = settings.ignore_cache || false;
+                // PDF output
+                document.getElementById('no-mono').checked = settings.no_mono || false;
+                document.getElementById('no-dual').checked = settings.no_dual || false;
+                document.getElementById('dual-translate-first').checked = settings.dual_translate_first || false;
+                document.getElementById('use-alternating-pages').checked = settings.use_alternating_pages || false;
+                document.getElementById('watermark-mode').value = settings.watermark_mode || 'watermarked';
+                document.getElementById('only-translated-pages').checked = settings.only_translated_pages || false;
+
+                // Advanced
+                document.getElementById('custom-system-prompt').value = settings.custom_system_prompt || '';
+                document.getElementById('min-text-length').value = settings.min_text_length || 5;
+                document.getElementById('primary-font').value = settings.primary_font || 'auto';
+                document.getElementById('enable-term-extraction').checked = settings.enable_term_extraction || false;
+                document.getElementById('save-glossary').checked = settings.save_glossary || false;
+                document.getElementById('rpc-doclayout').value = settings.rpc_doclayout || '';
+
+                // Advanced PDF
+                document.getElementById('skip-clean').checked = settings.skip_clean || false;
+                document.getElementById('disable-rich-text').checked = settings.disable_rich_text || false;
+                document.getElementById('enhance-compatibility').checked = settings.enhance_compatibility || false;
+                document.getElementById('split-short-lines').checked = settings.split_short_lines || false;
+                document.getElementById('split-factor').value = settings.split_factor || 0.5;
+                document.getElementById('translate-tables').checked = settings.translate_tables || false;
+                document.getElementById('skip-scanned-detection').checked = settings.skip_scanned_detection || false;
+                document.getElementById('ocr-workaround').checked = settings.ocr_workaround || false;
+                document.getElementById('auto-ocr').checked = settings.auto_ocr || false;
+                document.getElementById('max-pages-per-part').value = settings.max_pages_per_part || 0;
+                document.getElementById('formula-font-pattern').value = settings.formula_font_pattern || '';
+                document.getElementById('formula-char-pattern').value = settings.formula_char_pattern || '';
+
+                // Rate limiting
+                document.getElementById('rate-limit-mode').value = settings.rate_limit_mode || 'rpm';
+                document.getElementById('rpm-input').value = settings.rpm || 240;
+                document.getElementById('concurrent-threads').value = settings.concurrent_threads || 40;
+                document.getElementById('custom-qps').value = settings.custom_qps || 4;
+                document.getElementById('custom-workers').value = settings.custom_workers || 40;
+
+                // Term extraction
+                document.getElementById('term-service').value = settings.term_service || 'same';
+                document.getElementById('term-rate-mode').value = settings.term_rate_mode || 'rpm';
+                document.getElementById('term-rpm').value = settings.term_rpm || 240;
+                document.getElementById('term-concurrent').value = settings.term_concurrent || 40;
+                document.getElementById('term-qps').value = settings.term_qps || 4;
+                document.getElementById('term-workers').value = settings.term_workers || 40;
+
+                // BabelDOC
+                document.getElementById('merge-line-numbers').checked = settings.merge_line_numbers !== false;
+                document.getElementById('remove-formula-lines').checked = settings.remove_formula_lines !== false;
+                document.getElementById('iou-threshold').value = settings.iou_threshold || 0.5;
+                document.getElementById('protection-threshold').value = settings.protection_threshold || 0.5;
+                document.getElementById('skip-formula-offset').checked = settings.skip_formula_offset || false;
+
+                // Trigger change events to show/hide conditional fields
+                document.getElementById('page-range').dispatchEvent(new Event('change'));
+                document.getElementById('split-short-lines').dispatchEvent(new Event('change'));
+                document.getElementById('rate-limit-mode').dispatchEvent(new Event('change'));
+                document.getElementById('term-rate-mode').dispatchEvent(new Event('change'));
+
             } catch (error) {
-                showError(error);
+                showAlert('Failed to load settings: ' + error.message, 'error');
+            } finally {
+                hideLoading();
             }
         }
 
-        // Save settings
-        document.getElementById('settingsForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const settings = {
-                service: document.getElementById('service').value,
-                lang_from: document.getElementById('langFrom').value,
-                lang_to: document.getElementById('langTo').value,
-                api_key: document.getElementById('apiKey').value,
-                model: document.getElementById('model').value,
-                custom_prompt: document.getElementById('customPrompt').value,
-                no_dual: document.getElementById('noDual').checked,
-                no_mono: document.getElementById('noMono').checked,
-                ignore_cache: document.getElementById('ignoreCache').checked,
-            };
-
-            showLoading('Saving settings...');
-
+        async function saveAllSettings() {
+            showLoading();
             try {
+                const settings = {
+                    // Basic
+                    service: document.getElementById('service').value,
+                    api_key: document.getElementById('api-key').value,
+                    model: document.getElementById('model').value,
+                    lang_from: document.getElementById('lang-from').value,
+                    lang_to: document.getElementById('lang-to').value,
+                    page_range: document.getElementById('page-range').value,
+                    custom_pages: document.getElementById('custom-pages').value,
+                    ignore_cache: document.getElementById('ignore-cache').checked,
+
+                    // PDF output
+                    no_mono: document.getElementById('no-mono').checked,
+                    no_dual: document.getElementById('no-dual').checked,
+                    dual_translate_first: document.getElementById('dual-translate-first').checked,
+                    use_alternating_pages: document.getElementById('use-alternating-pages').checked,
+                    watermark_mode: document.getElementById('watermark-mode').value,
+                    only_translated_pages: document.getElementById('only-translated-pages').checked,
+
+                    // Advanced
+                    custom_system_prompt: document.getElementById('custom-system-prompt').value,
+                    min_text_length: parseInt(document.getElementById('min-text-length').value),
+                    primary_font: document.getElementById('primary-font').value,
+                    enable_term_extraction: document.getElementById('enable-term-extraction').checked,
+                    save_glossary: document.getElementById('save-glossary').checked,
+                    rpc_doclayout: document.getElementById('rpc-doclayout').value,
+
+                    // Advanced PDF
+                    skip_clean: document.getElementById('skip-clean').checked,
+                    disable_rich_text: document.getElementById('disable-rich-text').checked,
+                    enhance_compatibility: document.getElementById('enhance-compatibility').checked,
+                    split_short_lines: document.getElementById('split-short-lines').checked,
+                    split_factor: parseFloat(document.getElementById('split-factor').value),
+                    translate_tables: document.getElementById('translate-tables').checked,
+                    skip_scanned_detection: document.getElementById('skip-scanned-detection').checked,
+                    ocr_workaround: document.getElementById('ocr-workaround').checked,
+                    auto_ocr: document.getElementById('auto-ocr').checked,
+                    max_pages_per_part: parseInt(document.getElementById('max-pages-per-part').value),
+                    formula_font_pattern: document.getElementById('formula-font-pattern').value,
+                    formula_char_pattern: document.getElementById('formula-char-pattern').value,
+
+                    // Rate limiting
+                    rate_limit_mode: document.getElementById('rate-limit-mode').value,
+                    rpm: parseInt(document.getElementById('rpm-input').value),
+                    concurrent_threads: parseInt(document.getElementById('concurrent-threads').value),
+                    custom_qps: parseInt(document.getElementById('custom-qps').value),
+                    custom_workers: parseInt(document.getElementById('custom-workers').value),
+
+                    // Term extraction
+                    term_service: document.getElementById('term-service').value,
+                    term_rate_mode: document.getElementById('term-rate-mode').value,
+                    term_rpm: parseInt(document.getElementById('term-rpm').value),
+                    term_concurrent: parseInt(document.getElementById('term-concurrent').value),
+                    term_qps: parseInt(document.getElementById('term-qps').value),
+                    term_workers: parseInt(document.getElementById('term-workers').value),
+
+                    // BabelDOC
+                    merge_line_numbers: document.getElementById('merge-line-numbers').checked,
+                    remove_formula_lines: document.getElementById('remove-formula-lines').checked,
+                    iou_threshold: parseFloat(document.getElementById('iou-threshold').value),
+                    protection_threshold: parseFloat(document.getElementById('protection-threshold').value),
+                    skip_formula_offset: document.getElementById('skip-formula-offset').checked,
+                };
+
                 await api.updateSettings(settings);
-                hideLoading();
-                showSuccess('Settings saved successfully!');
+                showAlert('Settings saved successfully!', 'success');
             } catch (error) {
+                showAlert('Failed to save settings: ' + error.message, 'error');
+            } finally {
                 hideLoading();
-                showError(error);
             }
-        });
+        }
 
-        // Reset settings
-        document.getElementById('resetBtn').addEventListener('click', async () => {
-            if (!confirm('Are you sure you want to reset all settings to default?')) {
-                return;
-            }
-
-            showLoading('Resetting settings...');
-
-            try {
-                await api.resetSettings();
-                hideLoading();
-                showSuccess('Settings reset to default');
-                loadSettings();
-            } catch (error) {
-                hideLoading();
-                showError(error);
-            }
-        });
+        // Event listeners for save buttons
+        document.getElementById('save-basic-btn').addEventListener('click', saveAllSettings);
+        document.getElementById('save-pdf-output-btn').addEventListener('click', saveAllSettings);
+        document.getElementById('save-advanced-btn').addEventListener('click', saveAllSettings);
+        document.getElementById('save-rate-limit-btn').addEventListener('click', saveAllSettings);
+        document.getElementById('save-babeldoc-btn').addEventListener('click', saveAllSettings);
+        document.getElementById('save-all-btn').addEventListener('click', saveAllSettings);
 
         // Change password
-        document.getElementById('passwordForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        document.getElementById('change-password-btn').addEventListener('click', async () => {
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
 
-            const currentPassword = document.getElementById('currentPassword').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const errorDiv = document.getElementById('passwordError');
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showAlert('Please fill in all password fields', 'error');
+                return;
+            }
 
             if (newPassword !== confirmPassword) {
-                errorDiv.textContent = 'New passwords do not match';
-                errorDiv.style.display = 'block';
+                showAlert('New passwords do not match', 'error');
                 return;
             }
 
-            errorDiv.style.display = 'none';
-            showLoading('Changing password...');
+            if (newPassword.length < 6) {
+                showAlert('Password must be at least 6 characters', 'error');
+                return;
+            }
 
             try {
+                showLoading();
                 await api.changePassword(currentPassword, newPassword);
-                hideLoading();
-                showSuccess('Password changed successfully!');
-                document.getElementById('passwordForm').reset();
+                showAlert('Password changed successfully!', 'success');
+                document.getElementById('current-password').value = '';
+                document.getElementById('new-password').value = '';
+                document.getElementById('confirm-password').value = '';
             } catch (error) {
+                showAlert('Failed to change password: ' + error.message, 'error');
+            } finally {
                 hideLoading();
-                errorDiv.textContent = error.message;
-                errorDiv.style.display = 'block';
             }
         });
 
-        // Load users (admin only)
+        // User management functions
         async function loadUsers() {
-            const user = getCurrentUser();
-            if (!user || !user.is_admin) return;
-
             try {
-                const response = await api.listUsers();
-                const users = response.users || [];
+                const users = await api.getUsers();
+                const usersList = document.getElementById('users-list');
 
-                const usersList = document.getElementById('usersList');
-                usersList.innerHTML = users.map(u => `
-          <div class="card mb-sm">
-            <div class="flex flex-between">
-              <div>
-                <strong>${u.username}</strong>
-                ${u.is_admin ? '<span class="badge">Admin</span>' : ''}
-                <div class="text-secondary" style="font-size: var(--font-size-xs);">
-                  Created: ${formatDate(u.created_at)}
-                </div>
-              </div>
-              ${!u.is_admin ? `
-                <button class="btn btn-sm btn-danger" onclick="deleteUser('${u.username}')">
-                  Delete
-                </button>
-              ` : ''}
-            </div>
-          </div>
-        `).join('');
+                usersList.innerHTML = users.map(user => `
+                    <div class="flex flex-between mb-sm" style="padding: 1rem; background: var(--bg-card-hover); border-radius: var(--radius-md);">
+                        <div>
+                            <strong>${user.username}</strong>
+                            ${user.is_admin ? '<span class="badge">Admin</span>' : ''}
+                            <br>
+                            <small class="text-muted">Created: ${formatDate(user.created_at)}</small>
+                        </div>
+                        ${!user.is_admin ? `<button class="btn btn-danger btn-sm" onclick="deleteUser('${user.username}')">Delete</button>` : ''}
+                    </div>
+                `).join('');
             } catch (error) {
-                console.error('Failed to load users:', error);
+                showAlert('Failed to load users: ' + error.message, 'error');
             }
         }
 
-        // Add user modal
-        document.getElementById('addUserBtn').addEventListener('click', () => {
-            document.getElementById('addUserModal').style.display = 'flex';
-        });
+        document.getElementById('add-user-btn').addEventListener('click', async () => {
+            const username = document.getElementById('new-user-username').value;
+            const password = document.getElementById('new-user-password').value;
 
-        document.getElementById('cancelAddUserBtn').addEventListener('click', () => {
-            document.getElementById('addUserModal').style.display = 'none';
-            document.getElementById('addUserForm').reset();
-        });
-
-        // Add user form
-        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const username = document.getElementById('newUsername').value;
-            const password = document.getElementById('newUserPassword').value;
-            const errorDiv = document.getElementById('addUserError');
-
-            errorDiv.style.display = 'none';
-            showLoading('Creating user...');
-
-            try {
-                await api.register(username, password);
-                hideLoading();
-                showSuccess(`User '${username}' created successfully!`);
-                document.getElementById('addUserModal').style.display = 'none';
-                document.getElementById('addUserForm').reset();
-                loadUsers();
-            } catch (error) {
-                hideLoading();
-                errorDiv.textContent = error.message;
-                errorDiv.style.display = 'block';
-            }
-        });
-
-        // Delete user
-        async function deleteUser(username) {
-            if (!confirm(`Are you sure you want to delete user '${username}'?`)) {
+            if (!username || !password) {
+                showAlert('Please enter username and password', 'error');
                 return;
             }
 
-            showLoading('Deleting user...');
+            try {
+                showLoading();
+                await api.registerUser(username, password);
+                showAlert('User added successfully!', 'success');
+                document.getElementById('new-user-username').value = '';
+                document.getElementById('new-user-password').value = '';
+                await loadUsers();
+            } catch (error) {
+                showAlert('Failed to add user: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        async function deleteUser(username) {
+            if (!confirm(`Are you sure you want to delete user "${username}"?`)) {
+                return;
+            }
 
             try {
+                showLoading();
                 await api.deleteUser(username);
-                hideLoading();
-                showSuccess(`User '${username}' deleted successfully`);
-                loadUsers();
+                showAlert('User deleted successfully!', 'success');
+                await loadUsers();
             } catch (error) {
+                showAlert('Failed to delete user: ' + error.message, 'error');
+            } finally {
                 hideLoading();
-                showError(error);
             }
         }
+
+        // Reset to defaults
+        document.getElementById('reset-btn').addEventListener('click', async () => {
+            if (!confirm('Are you sure you want to reset all settings to defaults?')) {
+                return;
+            }
+
+            try {
+                showLoading();
+                await api.resetSettings();
+                showAlert('Settings reset to defaults!', 'success');
+                await loadSettings();
+            } catch (error) {
+                showAlert('Failed to reset settings: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // Initialize
+        init();
     </script>
 </body>
 
