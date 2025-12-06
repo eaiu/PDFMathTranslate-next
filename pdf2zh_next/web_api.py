@@ -432,7 +432,20 @@ async def download_translation(
 # Serve static files (frontend)
 static_dir = Path(__file__).parent / "static"
 if static_dir.exists():
-    app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="static")
+    # Mount CSS and JS directories
+    css_dir = static_dir / "css"
+    js_dir = static_dir / "js"
+    
+    if css_dir.exists():
+        app.mount("/static/css", StaticFiles(directory=str(css_dir)), name="css")
+    if js_dir.exists():
+        app.mount("/static/js", StaticFiles(directory=str(js_dir)), name="js")
+    
+    # Serve HTML files from static root
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static_html")
+    
+    # Serve root HTML files
+    app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="root")
 
 
 # Startup event
