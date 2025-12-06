@@ -158,3 +158,49 @@ function debounce(func, wait) {
         timeout = setTimeout(later, wait);
     };
 }
+
+/**
+ * Logout current user
+ */
+async function logout() {
+    try {
+        showLoading('Logging out...');
+        await api.logout();
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_info');
+        hideLoading();
+        window.location.href = '/login.html';
+    } catch (error) {
+        hideLoading();
+        console.error('Logout error:', error);
+        // Force logout even if API call fails
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_info');
+        window.location.href = '/login.html';
+    }
+}
+
+/**
+ * Update user info display in navigation
+ */
+async function updateUserInfo() {
+    const user = getCurrentUser();
+    if (!user) return null;
+
+    const userInfoEl = document.getElementById('user-info');
+    if (userInfoEl) {
+        userInfoEl.textContent = user.username;
+    }
+
+    // Bind logout button
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            logout();
+        });
+    }
+
+    updateAdminUI();
+    return user;
+}
