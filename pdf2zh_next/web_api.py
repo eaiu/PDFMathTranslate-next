@@ -507,6 +507,7 @@ async def run_translation(task_id: str, file_path: Path, output_dir: Path, trans
         history = json.loads(history_file.read_text()) if history_file.exists() else []
         history.append({
             "task_id": task_id,
+            "file_id": active_tasks[task_id].get("file_id"),
             "filename": file_path.name,
             "original_filename": original_filename,
             "created_at": active_tasks[task_id]["created_at"],
@@ -569,6 +570,55 @@ async def get_translation_history(current_user: dict = Depends(get_current_user)
         history = []
     
     return {"success": True, "history": history}
+
+
+@app.delete("/api/translate/history/{task_id}")
+async def delete_history_item(task_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a history item and its associated files"""
+    import shutil
+    
+    user_dir = user_manager.get_user_dir(current_user['username'])
+    history_file = user_dir / "history.json"
+    
+    if not history_file.exists():
+        raise HTTPException(status_code=404, detail="History not found")
+    
+    history = json.loads(history_file.read_text())
+    
+    # Find the history item
+    item_to_delete = None
+    for item in history:
+        if item.get('task_id') == task_id:
+            item_to_delete = item
+            break
+    
+    if not item_to_delete:
+        raise HTTPException(status_code=404, detail="History item not found")
+    
+    # Delete output directory (translated files)
+    output_dir = user_dir / "outputs" / task_id
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
+        logger.info(f"Deleted output directory: {output_dir}")
+    
+    # Delete original uploaded file if we can find it
+    file_id = item_to_delete.get('file_id')
+    if file_id:
+        upload_dir = user_dir / "uploads"
+        matching_files = list(upload_dir.glob(f"{file_id}_*"))
+        for f in matching_files:
+            f.unlink()
+            logger.info(f"Deleted uploaded file: {f}")
+    
+    # Remove from history
+    history = [item for item in history if item.get('task_id') != task_id]
+    history_file.write_text(json.dumps(history, indent=2))
+    
+    # Remove from active_tasks if exists
+    if task_id in active_tasks:
+        del active_tasks[task_id]
+    
+    return {"success": True, "message": "History item deleted"}
 
 
 @app.get("/api/translate/download/{task_id}")

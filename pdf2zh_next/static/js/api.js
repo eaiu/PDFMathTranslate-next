@@ -17,11 +17,11 @@ class APIClient {
     const headers = {
       'Content-Type': 'application/json',
     };
-    
+
     if (this.token) {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
-    
+
     return headers;
   }
 
@@ -40,7 +40,7 @@ class APIClient {
 
     try {
       const response = await fetch(url, config);
-      
+
       // Handle 401 Unauthorized
       if (response.status === 401) {
         this.clearToken();
@@ -49,7 +49,7 @@ class APIClient {
       }
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.detail || 'Request failed');
       }
@@ -93,7 +93,7 @@ class APIClient {
       method: 'POST',
       body: JSON.stringify({ username, password }),
     });
-    
+
     if (response.success) {
       this.setToken(response.token);
       localStorage.setItem('user_info', JSON.stringify({
@@ -101,7 +101,7 @@ class APIClient {
         is_admin: response.is_admin,
       }));
     }
-    
+
     return response;
   }
 
@@ -113,7 +113,7 @@ class APIClient {
       method: 'POST',
       body: JSON.stringify({ username, password }),
     });
-    
+
     if (response.success) {
       this.setToken(response.token);
       localStorage.setItem('user_info', JSON.stringify({
@@ -121,7 +121,7 @@ class APIClient {
         is_admin: response.is_admin,
       }));
     }
-    
+
     return response;
   }
 
@@ -277,6 +277,15 @@ class APIClient {
    */
   getDownloadUrl(taskId, fileType = 'mono') {
     return `${API_BASE_URL}/api/translate/download/${taskId}?file_type=${fileType}`;
+  }
+
+  /**
+   * Delete a history item and its files
+   */
+  async deleteHistoryItem(taskId) {
+    return this.request(`/api/translate/history/${taskId}`, {
+      method: 'DELETE'
+    });
   }
 }
 

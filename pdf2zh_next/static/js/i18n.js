@@ -51,6 +51,9 @@ const translations = {
         'upload.history.title': 'Translation History',
         'upload.history.subtitle': 'Your recent translations',
         'upload.history.empty': 'No translations yet',
+        'upload.history.delete.confirm': 'Are you sure you want to delete this translation? This will also delete the original and translated files.',
+        'upload.history.delete.success': 'Translation deleted successfully',
+        'upload.history.delete.failed': 'Failed to delete: ',
 
         // Settings Page
         'settings.title': 'Settings',
@@ -152,6 +155,9 @@ const translations = {
         'upload.history.title': '翻译历史',
         'upload.history.subtitle': '您最近的翻译',
         'upload.history.empty': '暂无翻译记录',
+        'upload.history.delete.confirm': '确定要删除这个翻译记录吗？这将同时删除原文件和翻译后的文件。',
+        'upload.history.delete.success': '删除成功',
+        'upload.history.delete.failed': '删除失败：',
 
         // Settings Page
         'settings.title': '设置',

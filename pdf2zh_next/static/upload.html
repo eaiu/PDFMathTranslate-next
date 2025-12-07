@@ -34,21 +34,22 @@
                     <div>
                         <div class="card">
                             <div class="card-header">
-                                <h2 class="card-title">Upload PDF</h2>
-                                <p class="card-subtitle">Upload a file or enter a URL to translate</p>
+                                <h2 class="card-title" data-i18n="upload.title">Upload PDF</h2>
+                                <p class="card-subtitle" data-i18n="upload.subtitle">Upload a file or enter a URL to
+                                    translate</p>
                             </div>
 
                             <div class="card-body">
                                 <!-- Upload Zone -->
                                 <div class="upload-zone" id="upload-zone">
                                     <div class="upload-icon">📄</div>
-                                    <p class="upload-text">Drag and drop your PDF here</p>
-                                    <p class="upload-hint">or click to browse</p>
+                                    <p class="upload-text" data-i18n="upload.drag">Drag and drop your PDF here</p>
+                                    <p class="upload-hint" data-i18n="upload.browse">or click to browse</p>
                                     <input type="file" id="file-input" accept=".pdf" style="display: none;">
                                 </div>
 
                                 <div class="text-center mt-md mb-md">
-                                    <span class="text-muted">— OR —</span>
+                                    <span class="text-muted" data-i18n="upload.or">— OR —</span>
                                 </div>
 
                                 <!-- URL Input -->
@@ -60,12 +61,12 @@
 
                                 <!-- Page Selection -->
                                 <div class="form-group">
-                                    <label class="form-label">Pages to Translate</label>
+                                    <label class="form-label" data-i18n="upload.pages">Pages to Translate</label>
                                     <select class="form-select" id="page-range-select">
-                                        <option value="all">All Pages</option>
-                                        <option value="first">First Page Only</option>
-                                        <option value="first5">First 5 Pages</option>
-                                        <option value="custom">Custom Range</option>
+                                        <option value="all" data-i18n="upload.pages.all">All Pages</option>
+                                        <option value="first" data-i18n="upload.pages.first">First Page Only</option>
+                                        <option value="first5" data-i18n="upload.pages.first5">First 5 Pages</option>
+                                        <option value="custom" data-i18n="upload.pages.custom">Custom Range</option>
                                     </select>
                                 </div>
 
@@ -77,7 +78,8 @@
                                 </div>
 
                                 <!-- Translate Button -->
-                                <button class="btn btn-primary btn-block btn-lg" id="translate-btn" disabled>
+                                <button class="btn btn-primary btn-block btn-lg" id="translate-btn" disabled
+                                    data-i18n="upload.btn.translate">
                                     Translate
                                 </button>
                             </div>
@@ -86,7 +88,7 @@
                         <!-- Progress Card -->
                         <div class="card mt-lg" id="progress-card" style="display: none;">
                             <div class="card-header">
-                                <h3 class="card-title">Translation Progress</h3>
+                                <h3 class="card-title" data-i18n="upload.progress.title">Translation Progress</h3>
                             </div>
                             <div class="card-body">
                                 <div class="progress-bar mb-md">
@@ -98,23 +100,23 @@
                             </div>
                         </div>
 
-                        <!-- Result Card -->
                         <div class="card mt-lg" id="result-card" style="display: none;">
                             <div class="card-header">
-                                <h3 class="card-title">Translation Complete!</h3>
+                                <h3 class="card-title" data-i18n="upload.result.title">Translation Complete!</h3>
                             </div>
                             <div class="card-body">
                                 <div class="flex gap-md">
-                                    <button class="btn btn-success flex-1" id="download-mono-btn"
-                                        style="display: none;">
+                                    <button class="btn btn-success flex-1" id="download-mono-btn" style="display: none;"
+                                        data-i18n="upload.result.mono">
                                         📥 Download Translation Only
                                     </button>
-                                    <button class="btn btn-success flex-1" id="download-dual-btn"
-                                        style="display: none;">
+                                    <button class="btn btn-success flex-1" id="download-dual-btn" style="display: none;"
+                                        data-i18n="upload.result.dual">
                                         📥 Download Bilingual
                                     </button>
                                 </div>
-                                <button class="btn btn-secondary btn-block mt-md" id="new-translation-btn">
+                                <button class="btn btn-secondary btn-block mt-md" id="new-translation-btn"
+                                    data-i18n="upload.result.new">
                                     Start New Translation
                                 </button>
                             </div>
@@ -125,12 +127,14 @@
                     <div>
                         <div class="card">
                             <div class="card-header">
-                                <h2 class="card-title">Translation History</h2>
-                                <p class="card-subtitle">Your recent translations</p>
+                                <h2 class="card-title" data-i18n="upload.history.title">Translation History</h2>
+                                <p class="card-subtitle" data-i18n="upload.history.subtitle">Your recent translations
+                                </p>
                             </div>
                             <div class="card-body">
                                 <div id="history-list">
-                                    <p class="text-center text-muted">No translations yet</p>
+                                    <p class="text-center text-muted" data-i18n="upload.history.empty">No translations
+                                        yet</p>
                                 </div>
                             </div>
                         </div>
@@ -245,8 +249,9 @@
                     pages = '1-5';
                 }
 
-                // Start translation
-                const result = await api.startTranslation(fileId, pages);
+                // Start translation - send pages as object
+                const translationSettings = pages ? { pages: pages } : {};
+                const result = await api.startTranslation(fileId, translationSettings);
                 currentTaskId = result.task_id;
 
                 // Show progress card
@@ -378,8 +383,8 @@
             document.getElementById('url-input').value = '';
             document.getElementById('translate-btn').disabled = true;
             document.getElementById('result-card').style.display = 'none';
-            uploadZone.querySelector('.upload-text').textContent = 'Drag and drop your PDF here';
-            uploadZone.querySelector('.upload-hint').textContent = 'or click to browse';
+            uploadZone.querySelector('.upload-text').textContent = i18n.t('upload.drag');
+            uploadZone.querySelector('.upload-hint').textContent = i18n.t('upload.browse');
         });
 
         // Load translation history
@@ -390,7 +395,7 @@
                 const historyList = document.getElementById('history-list');
 
                 if (history.length === 0) {
-                    historyList.innerHTML = '<p class="text-center text-muted">No translations yet</p>';
+                    historyList.innerHTML = `<p class="text-center text-muted">${i18n.t('upload.history.empty')}</p>`;
                     return;
                 }
 
@@ -398,9 +403,12 @@
                     <div class="card mb-md" style="padding: 1rem;">
                         <div class="flex flex-between mb-sm">
                             <strong>${item.filename || 'Untitled'}</strong>
-                            <span class="badge badge-${item.status === 'completed' ? 'success' : item.status === 'failed' ? 'error' : 'warning'}">
-                                ${item.status}
-                            </span>
+                            <div class="flex gap-sm">
+                                <span class="badge badge-${item.status === 'completed' ? 'success' : item.status === 'failed' ? 'error' : 'warning'}">
+                                    ${item.status}
+                                </span>
+                                <button class="btn btn-sm btn-error" onclick="deleteHistoryItem('${item.task_id}')" title="Delete">🗑️</button>
+                            </div>
                         </div>
                         <small class="text-muted">${formatDate(item.created_at)}</small>
                         ${item.status === 'completed' ? `
@@ -413,6 +421,20 @@
                 `).join('');
             } catch (error) {
                 console.error('Error loading history:', error);
+            }
+        }
+
+        async function deleteHistoryItem(taskId) {
+            if (!confirm(i18n.t('upload.history.delete.confirm'))) {
+                return;
+            }
+            try {
+                await api.deleteHistoryItem(taskId);
+                showAlert(i18n.t('upload.history.delete.success'), 'success');
+                await loadHistory();
+            } catch (error) {
+                console.error('Delete error:', error);
+                showAlert(i18n.t('upload.history.delete.failed') + error.message, 'error');
             }
         }
 
