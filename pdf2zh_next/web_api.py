@@ -105,7 +105,7 @@ def build_settings_model_from_user_config(user_settings: dict, output_dir: Path,
         OpenAISettings, AzureOpenAISettings, GeminiSettings, DeepLSettings,
         OllamaSettings, SiliconFlowSettings, DeepSeekSettings,
         SiliconFlowFreeSettings, ZhipuSettings, AnythingLLMSettings,
-        ClaudeCodeSettings
+        ClaudeCodeSettings, BingSettings, GoogleSettings, TencentSettings
     )
     
     # Get translation service from user settings
@@ -134,7 +134,7 @@ def build_settings_model_from_user_config(user_settings: dict, output_dir: Path,
         )
     elif service == 'DeepL':
         engine_settings = DeepLSettings(
-            deepl_api_key=user_settings.get('deepl_api_key', ''),
+            deepl_auth_key=user_settings.get('deepl_api_key', ''),
         )
     elif service == 'Ollama':
         engine_settings = OllamaSettings(
@@ -161,8 +161,17 @@ def build_settings_model_from_user_config(user_settings: dict, output_dir: Path,
             claudecode_model=user_settings.get('claude_model', 'claude-sonnet-4-20250514'),
             claudecode_api_key=user_settings.get('claude_api_key', ''),
         )
+    elif service == 'Bing':
+        engine_settings = BingSettings()
+    elif service == 'Google':
+        engine_settings = GoogleSettings()
+    elif service == 'Tencent':
+        engine_settings = TencentSettings(
+            tencentcloud_secret_id=user_settings.get('tencent_secret_id', ''),
+            tencentcloud_secret_key=user_settings.get('tencent_secret_key', ''),
+        )
     else:
-        # Default to SiliconFlowFree
+        # Default to SiliconFlowFree (also handles 'SiliconFlowFree' and 'DeepLX' which doesn't exist)
         engine_settings = SiliconFlowFreeSettings()
     
     # Build SettingsModel
@@ -178,6 +187,41 @@ def build_settings_model_from_user_config(user_settings: dict, output_dir: Path,
     settings.translation.ignore_cache = user_settings.get('ignore_cache', False)
     settings.translation.qps = user_settings.get('custom_qps', user_settings.get('qps', 4))
     
+    # Additional translation settings
+    min_text_length = user_settings.get('min_text_length', 5)
+    if min_text_length:
+        settings.translation.min_text_length = min_text_length
+    
+    rpc_doclayout = user_settings.get('rpc_doclayout', '')
+    if rpc_doclayout:
+        settings.translation.rpc_doclayout = rpc_doclayout
+    
+    custom_prompt = user_settings.get('custom_system_prompt', '')
+    if custom_prompt:
+        settings.translation.custom_system_prompt = custom_prompt
+    
+    primary_font = user_settings.get('primary_font', '')
+    if primary_font and primary_font != 'auto':
+        settings.translation.primary_font_family = primary_font
+    
+    # Worker pool settings
+    custom_workers = user_settings.get('custom_workers', 0)
+    if custom_workers and custom_workers > 0:
+        settings.translation.pool_max_workers = custom_workers
+    
+    # Term extraction settings
+    settings.translation.no_auto_extract_glossary = not user_settings.get('enable_term_extraction', False)
+    settings.translation.save_auto_extracted_glossary = user_settings.get('save_glossary', False)
+    
+    term_qps = user_settings.get('term_qps', 0)
+    if term_qps and term_qps > 0:
+        settings.translation.term_qps = term_qps
+    
+    term_workers = user_settings.get('term_workers', 0)
+    if term_workers and term_workers > 0:
+        settings.translation.term_pool_max_workers = term_workers
+    
+    
     # Configure PDF settings
     if pages:
         settings.pdf.pages = pages
@@ -188,6 +232,46 @@ def build_settings_model_from_user_config(user_settings: dict, output_dir: Path,
     settings.pdf.enhance_compatibility = user_settings.get('enhance_compatibility', False)
     settings.pdf.ocr_workaround = user_settings.get('ocr_workaround', False)
     settings.pdf.translate_table_text = user_settings.get('translate_tables', user_settings.get('translate_table_text', True))
+    
+    # Additional PDF settings
+    settings.pdf.split_short_lines = user_settings.get('split_short_lines', False)
+    settings.pdf.short_line_split_factor = user_settings.get('split_factor', 0.8)
+    settings.pdf.disable_rich_text_translate = user_settings.get('disable_rich_text', False)
+    settings.pdf.use_alternating_pages_dual = user_settings.get('use_alternating_pages', False)
+    settings.pdf.skip_scanned_detection = user_settings.get('skip_scanned_detection', False)
+    settings.pdf.only_include_translated_page = user_settings.get('only_translated_pages', False)
+    settings.pdf.auto_enable_ocr_workaround = user_settings.get('auto_ocr', False)
+    
+    # Max pages per part (0 means None/no limit)
+    max_pages = user_settings.get('max_pages_per_part', 0)
+    if max_pages and max_pages > 0:
+        settings.pdf.max_pages_per_part = max_pages
+    
+    # Formula patterns (note: frontend uses 'formula', backend uses 'formular')
+    formula_font = user_settings.get('formula_font_pattern', '')
+    if formula_font:
+        settings.pdf.formular_font_pattern = formula_font
+    formula_char = user_settings.get('formula_char_pattern', '')
+    if formula_char:
+        settings.pdf.formular_char_pattern = formula_char
+    
+    # BabelDOC settings (note: frontend uses positive, backend uses negative/no_ prefix)
+    # merge_line_numbers=True means we WANT to merge, so no_merge should be False
+    settings.pdf.no_merge_alternating_line_numbers = not user_settings.get('merge_line_numbers', False)
+    # remove_formula_lines=True means we WANT to remove, so no_remove should be False
+    settings.pdf.no_remove_non_formula_lines = not user_settings.get('remove_formula_lines', False)
+    settings.pdf.non_formula_line_iou_threshold = user_settings.get('iou_threshold', 0.9)
+    settings.pdf.figure_table_protection_threshold = user_settings.get('protection_threshold', 0.9)
+    settings.pdf.skip_formula_offset_calculation = user_settings.get('skip_formula_offset', False)
+    
+    # Map watermark mode - frontend uses 'none', 'watermark', 'both', backend uses 'no_watermark', 'watermarked', 'both'
+    watermark_mode = user_settings.get('watermark_mode', 'watermark')
+    if watermark_mode == 'none':
+        settings.pdf.watermark_output_mode = 'no_watermark'
+    elif watermark_mode == 'both':
+        settings.pdf.watermark_output_mode = 'both'
+    else:
+        settings.pdf.watermark_output_mode = 'watermarked'
     
     return settings
 

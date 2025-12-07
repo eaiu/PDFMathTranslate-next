@@ -290,3 +290,10 @@ if (document.readyState === 'loading') {
 } else {
     initI18n();
 }
+
+// Global i18n object for easy access
+const i18n = {
+    t: t,
+    setLanguage: setLanguage,
+    getCurrentLang: () => currentLang
+};
