@@ -1025,7 +1025,7 @@
         // User management functions
         async function loadUsers() {
             try {
-                const users = await api.getUsers();
+                const users = await api.listUsers();
                 const usersList = document.getElementById('users-list');
 
                 usersList.innerHTML = users.map(user => `
@@ -1055,7 +1055,7 @@
 
             try {
                 showLoading();
-                await api.registerUser(username, password);
+                await api.register(username, password);
                 showAlert('User added successfully!', 'success');
                 document.getElementById('new-user-username').value = '';
                 document.getElementById('new-user-password').value = '';
