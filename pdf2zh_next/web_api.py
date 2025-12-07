@@ -730,17 +730,22 @@ async def download_translation(
     if not file_path or not Path(file_path).exists():
         raise HTTPException(status_code=404, detail="File not found")
     
-    # Generate meaningful filename: originalname_mono/dual_taskid.pdf
+    # Generate clean filename: originalname_mono/dual.pdf
     original_filename = task.get("original_filename", "translated")
     # Remove .pdf extension if present
     if original_filename.lower().endswith('.pdf'):
         original_filename = original_filename[:-4]
+    # Remove UUID prefix if present (format: uuid_filename)
+    if '_' in original_filename:
+        parts = original_filename.split('_', 1)
+        # Check if first part looks like UUID (32+ hex chars with dashes)
+        if len(parts[0]) >= 32 or (len(parts[0]) == 36 and '-' in parts[0]):
+            original_filename = parts[1] if len(parts) > 1 else original_filename
     # Clean filename for safety
     import re
-    clean_name = re.sub(r'[^\w\-\u4e00-\u9fff]', '_', original_filename)
-    # Generate download filename
-    short_task_id = task_id[:8]  # Use first 8 chars of UUID for brevity
-    download_filename = f"{clean_name}_{file_type}_{short_task_id}.pdf"
+    clean_name = re.sub(r'[^\w\-\u4e00-\u9fff\.]', '_', original_filename)
+    # Generate download filename: originalname_mono/dual.pdf
+    download_filename = f"{clean_name}_{file_type}.pdf"
     
     return FileResponse(
         file_path,
