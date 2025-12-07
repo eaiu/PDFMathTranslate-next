@@ -325,8 +325,49 @@
             loadHistory();
         }
 
-        function downloadFile(fileType) {
-            window.open(`/api/translate/download/${currentTaskId}?file_type=${fileType}`, '_blank');
+        async function downloadFile(fileType, taskId = null) {
+            const downloadTaskId = taskId || currentTaskId;
+            if (!downloadTaskId) {
+                console.error('No task ID for download');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch(`/api/translate/download/${downloadTaskId}?file_type=${fileType}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Download failed');
+                }
+
+                // Get filename from Content-Disposition header or use default
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let filename = `translated_${fileType}.pdf`;
+                if (contentDisposition) {
+                    const match = contentDisposition.match(/filename="?([^";\n]+)"?/);
+                    if (match) {
+                        filename = match[1];
+                    }
+                }
+
+                // Create blob and download
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Download error:', error);
+                alert('Download failed: ' + error.message);
+            }
         }
 
         // New translation button
@@ -364,8 +405,8 @@
                         <small class="text-muted">${formatDate(item.created_at)}</small>
                         ${item.status === 'completed' ? `
                             <div class="flex gap-sm mt-sm">
-                                ${item.mono_path ? `<button class="btn btn-sm btn-secondary" onclick="window.open('/api/translate/download/${item.task_id}?file_type=mono', '_blank')">📥 Mono</button>` : ''}
-                                ${item.dual_path ? `<button class="btn btn-sm btn-secondary" onclick="window.open('/api/translate/download/${item.task_id}?file_type=dual', '_blank')">📥 Dual</button>` : ''}
+                                ${item.mono_path ? `<button class="btn btn-sm btn-secondary" onclick="downloadFile('mono', '${item.task_id}')">📥 Mono</button>` : ''}
+                                ${item.dual_path ? `<button class="btn btn-sm btn-secondary" onclick="downloadFile('dual', '${item.task_id}')">📥 Dual</button>` : ''}
                             </div>
                         ` : ''}
                     </div>
