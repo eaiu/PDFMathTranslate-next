@@ -653,13 +653,7 @@
         </main>
     </div>
 
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loading-overlay" style="display: none;">
-        <div class="loading-content">
-            <div class="spinner"></div>
-            <p class="loading-text">Loading...</p>
-        </div>
-    </div>
+
 
     <script src="/static/js/auth.js"></script>
     <script src="/static/js/api.js"></script>
@@ -746,7 +740,6 @@
 
         // Initialize on page load
         async function init() {
-            showLoading('Initializing...');
             try {
                 await requireAuth();
                 const userInfo = await updateUserInfo();
@@ -771,117 +764,108 @@
                 }
             } catch (error) {
                 console.error('Initialization error:', error);
-                showAlert('Failed to initialize: ' + error.message, 'error');
-            } finally {
-                hideLoading();
+                showError(error);
             }
         }
 
         async function loadSettings() {
-            try {
-                const response = await api.getSettings();
-                const settings = response.settings || {};
-                console.log('Loaded settings:', settings);
+            const response = await api.getSettings();
+            const settings = response.settings || {};
+            console.log('Loaded settings:', settings);
 
-                // Populate all form fields
-                // Basic settings
-                const service = settings.service || 'AzureOpenAI';
-                document.getElementById('service').value = service;
+            // Populate all form fields
+            // Basic settings
+            const service = settings.service || 'AzureOpenAI';
+            document.getElementById('service').value = service;
 
-                // Load service-specific settings
-                if (service === 'OpenAI') {
-                    document.getElementById('openai-model').value = settings.openai_model || 'gpt-4o-mini';
-                    document.getElementById('openai-api-key').value = settings.openai_api_key || '';
-                    document.getElementById('openai-base-url').value = settings.openai_base_url || '';
-                    document.getElementById('openai-timeout').value = settings.openai_timeout || '';
-                    document.getElementById('openai-temperature').value = settings.openai_temperature || '';
-                    document.getElementById('openai-send-temperature').checked = settings.openai_send_temprature || false;
-                    document.getElementById('openai-reasoning-effort').value = settings.openai_reasoning_effort || '';
-                    document.getElementById('openai-send-reasoning-effort').checked = settings.openai_send_reasoning_effort || false;
-                    document.getElementById('openai-enable-json-mode').checked = settings.openai_enable_json_mode || false;
-                } else if (service === 'AzureOpenAI') {
-                    document.getElementById('azure-openai-model').value = settings.azure_openai_model || 'gpt-4o-mini';
-                    document.getElementById('azure-openai-api-key').value = settings.azure_openai_api_key || '';
-                    document.getElementById('azure-openai-base-url').value = settings.azure_openai_base_url || '';
-                    document.getElementById('azure-openai-api-version').value = settings.azure_openai_api_version || '2024-06-01';
-                } else if (service === 'GoogleGemini') {
-                    document.getElementById('gemini-model').value = settings.gemini_model || 'gemini-1.5-flash';
-                    document.getElementById('gemini-api-key').value = settings.gemini_api_key || '';
-                    document.getElementById('gemini-enable-json-mode').checked = settings.gemini_enable_json_mode || false;
-                }
-
-                document.getElementById('lang-from').value = settings.lang_from || 'auto';
-                document.getElementById('lang-to').value = settings.lang_to || 'zh';
-                document.getElementById('page-range').value = settings.page_range || 'all';
-                document.getElementById('ignore-cache').checked = settings.ignore_cache || false;
-
-                // PDF output
-                document.getElementById('no-mono').checked = settings.no_mono || false;
-                document.getElementById('no-dual').checked = settings.no_dual || false;
-                document.getElementById('dual-translate-first').checked = settings.dual_translate_first || false;
-                document.getElementById('use-alternating-pages').checked = settings.use_alternating_pages || false;
-                document.getElementById('watermark-mode').value = settings.watermark_mode || 'watermarked';
-                document.getElementById('only-translated-pages').checked = settings.only_translated_pages || false;
-
-                // Advanced
-                document.getElementById('custom-system-prompt').value = settings.custom_system_prompt || '';
-                document.getElementById('min-text-length').value = settings.min_text_length || 5;
-                document.getElementById('primary-font').value = settings.primary_font || 'auto';
-                document.getElementById('enable-term-extraction').checked = settings.enable_term_extraction || false;
-                document.getElementById('save-glossary').checked = settings.save_glossary || false;
-                document.getElementById('rpc-doclayout').value = settings.rpc_doclayout || '';
-
-                // Advanced PDF
-                document.getElementById('skip-clean').checked = settings.skip_clean || false;
-                document.getElementById('disable-rich-text').checked = settings.disable_rich_text || false;
-                document.getElementById('enhance-compatibility').checked = settings.enhance_compatibility || false;
-                document.getElementById('split-short-lines').checked = settings.split_short_lines || false;
-                document.getElementById('split-factor').value = settings.split_factor || 0.5;
-                document.getElementById('translate-tables').checked = settings.translate_tables || false;
-                document.getElementById('skip-scanned-detection').checked = settings.skip_scanned_detection || false;
-                document.getElementById('ocr-workaround').checked = settings.ocr_workaround || false;
-                document.getElementById('auto-ocr').checked = settings.auto_ocr || false;
-                document.getElementById('max-pages-per-part').value = settings.max_pages_per_part || 0;
-                document.getElementById('formula-font-pattern').value = settings.formula_font_pattern || '';
-                document.getElementById('formula-char-pattern').value = settings.formula_char_pattern || '';
-
-                // Rate limiting
-                document.getElementById('rate-limit-mode').value = settings.rate_limit_mode || 'rpm';
-                document.getElementById('rpm-input').value = settings.rpm || 240;
-                document.getElementById('concurrent-threads').value = settings.concurrent_threads || 40;
-                document.getElementById('custom-qps').value = settings.custom_qps || 4;
-                document.getElementById('custom-workers').value = settings.custom_workers || 40;
-
-                // Term extraction
-                document.getElementById('term-service').value = settings.term_service || 'same';
-                document.getElementById('term-rate-mode').value = settings.term_rate_mode || 'rpm';
-                document.getElementById('term-rpm').value = settings.term_rpm || 240;
-                document.getElementById('term-concurrent').value = settings.term_concurrent || 40;
-                document.getElementById('term-qps').value = settings.term_qps || 4;
-                document.getElementById('term-workers').value = settings.term_workers || 40;
-
-                // BabelDOC
-                document.getElementById('merge-line-numbers').checked = settings.merge_line_numbers !== false;
-                document.getElementById('remove-formula-lines').checked = settings.remove_formula_lines !== false;
-                document.getElementById('iou-threshold').value = settings.iou_threshold || 0.5;
-                document.getElementById('protection-threshold').value = settings.protection_threshold || 0.5;
-                document.getElementById('skip-formula-offset').checked = settings.skip_formula_offset || false;
-
-                // Trigger change events to show/hide conditional fields
-                document.getElementById('service').dispatchEvent(new Event('change'));
-                document.getElementById('page-range').dispatchEvent(new Event('change'));
-                document.getElementById('split-short-lines').dispatchEvent(new Event('change'));
-                document.getElementById('rate-limit-mode').dispatchEvent(new Event('change'));
-                document.getElementById('term-rate-mode').dispatchEvent(new Event('change'));
-
-            } catch (error) {
-                console.error('Failed to load settings:', error);
-                // Don't show alert here as init() will handle the error display
+            // Load service-specific settings
+            if (service === 'OpenAI') {
+                document.getElementById('openai-model').value = settings.openai_model || 'gpt-4o-mini';
+                document.getElementById('openai-api-key').value = settings.openai_api_key || '';
+                document.getElementById('openai-base-url').value = settings.openai_base_url || '';
+                document.getElementById('openai-timeout').value = settings.openai_timeout || '';
+                document.getElementById('openai-temperature').value = settings.openai_temperature || '';
+                document.getElementById('openai-send-temperature').checked = settings.openai_send_temprature || false;
+                document.getElementById('openai-reasoning-effort').value = settings.openai_reasoning_effort || '';
+                document.getElementById('openai-send-reasoning-effort').checked = settings.openai_send_reasoning_effort || false;
+                document.getElementById('openai-enable-json-mode').checked = settings.openai_enable_json_mode || false;
+            } else if (service === 'AzureOpenAI') {
+                document.getElementById('azure-openai-model').value = settings.azure_openai_model || 'gpt-4o-mini';
+                document.getElementById('azure-openai-api-key').value = settings.azure_openai_api_key || '';
+                document.getElementById('azure-openai-base-url').value = settings.azure_openai_base_url || '';
+                document.getElementById('azure-openai-api-version').value = settings.azure_openai_api_version || '2024-06-01';
+            } else if (service === 'GoogleGemini') {
+                document.getElementById('gemini-model').value = settings.gemini_model || 'gemini-1.5-flash';
+                document.getElementById('gemini-api-key').value = settings.gemini_api_key || '';
+                document.getElementById('gemini-enable-json-mode').checked = settings.gemini_enable_json_mode || false;
             }
+
+            document.getElementById('lang-from').value = settings.lang_from || 'auto';
+            document.getElementById('lang-to').value = settings.lang_to || 'zh';
+            document.getElementById('page-range').value = settings.page_range || 'all';
+            document.getElementById('ignore-cache').checked = settings.ignore_cache || false;
+
+            // PDF output
+            document.getElementById('no-mono').checked = settings.no_mono || false;
+            document.getElementById('no-dual').checked = settings.no_dual || false;
+            document.getElementById('dual-translate-first').checked = settings.dual_translate_first || false;
+            document.getElementById('use-alternating-pages').checked = settings.use_alternating_pages || false;
+            document.getElementById('watermark-mode').value = settings.watermark_mode || 'watermarked';
+            document.getElementById('only-translated-pages').checked = settings.only_translated_pages || false;
+
+            // Advanced
+            document.getElementById('custom-system-prompt').value = settings.custom_system_prompt || '';
+            document.getElementById('min-text-length').value = settings.min_text_length || 5;
+            document.getElementById('primary-font').value = settings.primary_font || 'auto';
+            document.getElementById('enable-term-extraction').checked = settings.enable_term_extraction || false;
+            document.getElementById('save-glossary').checked = settings.save_glossary || false;
+            document.getElementById('rpc-doclayout').value = settings.rpc_doclayout || '';
+
+            // Advanced PDF
+            document.getElementById('skip-clean').checked = settings.skip_clean || false;
+            document.getElementById('disable-rich-text').checked = settings.disable_rich_text || false;
+            document.getElementById('enhance-compatibility').checked = settings.enhance_compatibility || false;
+            document.getElementById('split-short-lines').checked = settings.split_short_lines || false;
+            document.getElementById('split-factor').value = settings.split_factor || 0.5;
+            document.getElementById('translate-tables').checked = settings.translate_tables || false;
+            document.getElementById('skip-scanned-detection').checked = settings.skip_scanned_detection || false;
+            document.getElementById('ocr-workaround').checked = settings.ocr_workaround || false;
+            document.getElementById('auto-ocr').checked = settings.auto_ocr || false;
+            document.getElementById('max-pages-per-part').value = settings.max_pages_per_part || 0;
+            document.getElementById('formula-font-pattern').value = settings.formula_font_pattern || '';
+            document.getElementById('formula-char-pattern').value = settings.formula_char_pattern || '';
+
+            // Rate limiting
+            document.getElementById('rate-limit-mode').value = settings.rate_limit_mode || 'rpm';
+            document.getElementById('rpm-input').value = settings.rpm || 240;
+            document.getElementById('concurrent-threads').value = settings.concurrent_threads || 40;
+            document.getElementById('custom-qps').value = settings.custom_qps || 4;
+            document.getElementById('custom-workers').value = settings.custom_workers || 40;
+
+            // Term extraction
+            document.getElementById('term-service').value = settings.term_service || 'same';
+            document.getElementById('term-rate-mode').value = settings.term_rate_mode || 'rpm';
+            document.getElementById('term-rpm').value = settings.term_rpm || 240;
+            document.getElementById('term-concurrent').value = settings.term_concurrent || 40;
+            document.getElementById('term-qps').value = settings.term_qps || 4;
+            document.getElementById('term-workers').value = settings.term_workers || 40;
+
+            // BabelDOC
+            document.getElementById('merge-line-numbers').checked = settings.merge_line_numbers !== false;
+            document.getElementById('remove-formula-lines').checked = settings.remove_formula_lines !== false;
+            document.getElementById('iou-threshold').value = settings.iou_threshold || 0.5;
+            document.getElementById('protection-threshold').value = settings.protection_threshold || 0.5;
+            document.getElementById('skip-formula-offset').checked = settings.skip_formula_offset || false;
+
+            // Trigger change events to show/hide conditional fields
+            document.getElementById('service').dispatchEvent(new Event('change'));
+            document.getElementById('page-range').dispatchEvent(new Event('change'));
+            document.getElementById('split-short-lines').dispatchEvent(new Event('change'));
+            document.getElementById('rate-limit-mode').dispatchEvent(new Event('change'));
+            document.getElementById('term-rate-mode').dispatchEvent(new Event('change'));
         }
 
         async function saveAllSettings() {
-            showLoading();
             try {
                 const service = document.getElementById('service').value;
                 const settings = {
@@ -971,11 +955,9 @@
                 };
 
                 await api.updateSettings(settings);
-                showAlert('Settings saved successfully!', 'success');
+                showSuccess('Settings saved successfully!');
             } catch (error) {
-                showAlert('Failed to save settings: ' + error.message, 'error');
-            } finally {
-                hideLoading();
+                showError(error);
             }
         }
 
@@ -1009,16 +991,13 @@
             }
 
             try {
-                showLoading();
                 await api.changePassword(currentPassword, newPassword);
-                showAlert('Password changed successfully!', 'success');
+                showSuccess('Password changed successfully!');
                 document.getElementById('current-password').value = '';
                 document.getElementById('new-password').value = '';
                 document.getElementById('confirm-password').value = '';
             } catch (error) {
-                showAlert('Failed to change password: ' + error.message, 'error');
-            } finally {
-                hideLoading();
+                showError(error);
             }
         });
 
@@ -1034,7 +1013,7 @@
                             <strong>${user.username}</strong>
                             ${user.is_admin ? '<span class="badge">Admin</span>' : ''}
                             <br>
-                            <small class="text-muted">Created: ${formatDate(user.created_at)}</small>
+                            <small style="color: var(--text-muted);">Created: ${formatDate(user.created_at)}</small>
                         </div>
                         ${!user.is_admin ? `<button class="btn btn-danger btn-sm" onclick="deleteUser('${user.username}')">Delete</button>` : ''}
                     </div>
@@ -1054,16 +1033,13 @@
             }
 
             try {
-                showLoading();
                 await api.register(username, password);
-                showAlert('User added successfully!', 'success');
+                showSuccess('User added successfully!');
                 document.getElementById('new-user-username').value = '';
                 document.getElementById('new-user-password').value = '';
                 await loadUsers();
             } catch (error) {
-                showAlert('Failed to add user: ' + error.message, 'error');
-            } finally {
-                hideLoading();
+                showError(error);
             }
         });
 
@@ -1073,14 +1049,11 @@
             }
 
             try {
-                showLoading();
                 await api.deleteUser(username);
-                showAlert('User deleted successfully!', 'success');
+                showSuccess('User deleted successfully!');
                 await loadUsers();
             } catch (error) {
-                showAlert('Failed to delete user: ' + error.message, 'error');
-            } finally {
-                hideLoading();
+                showError(error);
             }
         }
 
@@ -1091,14 +1064,11 @@
             }
 
             try {
-                showLoading();
                 await api.resetSettings();
-                showAlert('Settings reset to defaults!', 'success');
+                showSuccess('Settings reset to defaults!');
                 await loadSettings();
             } catch (error) {
-                showAlert('Failed to reset settings: ' + error.message, 'error');
-            } finally {
-                hideLoading();
+                showError(error);
             }
         });
 
