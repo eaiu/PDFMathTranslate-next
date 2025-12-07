@@ -1004,7 +1004,8 @@
         // User management functions
         async function loadUsers() {
             try {
-                const users = await api.listUsers();
+                const response = await api.listUsers();
+                const users = response.users || [];
                 const usersList = document.getElementById('users-list');
 
                 usersList.innerHTML = users.map(user => `
@@ -1019,7 +1020,7 @@
                     </div>
                 `).join('');
             } catch (error) {
-                showAlert('Failed to load users: ' + error.message, 'error');
+                showError(error);
             }
         }
 

@@ -220,16 +220,17 @@
             try {
                 showLoading();
 
-                let uploadedFilePath;
+                let fileId;
 
                 if (currentFile) {
                     // Upload file
-                    uploadedFilePath = await api.uploadFile(currentFile, (progress) => {
+                    const uploadResponse = await api.uploadFile(currentFile, (progress) => {
                         console.log(`Upload progress: ${progress}%`);
                     });
+                    fileId = uploadResponse.file_id;
                 } else if (urlInput) {
                     // Use URL
-                    uploadedFilePath = urlInput;
+                    fileId = urlInput;
                 } else {
                     throw new Error('Please select a file or enter a URL');
                 }
@@ -245,7 +246,7 @@
                 }
 
                 // Start translation
-                const result = await api.startTranslation(uploadedFilePath, pages);
+                const result = await api.startTranslation(fileId, pages);
                 currentTaskId = result.task_id;
 
                 // Show progress card
@@ -269,15 +270,16 @@
 
             progressInterval = setInterval(async () => {
                 try {
-                    const status = await api.getTranslationStatus(currentTaskId);
+                    const response = await api.getTranslationStatus(currentTaskId);
+                    const status = response.task || response;
 
                     // Update progress
                     const progressFill = document.getElementById('progress-fill');
                     const progressText = document.getElementById('progress-text');
                     const progressDetail = document.getElementById('progress-detail');
 
-                    progressFill.style.width = status.progress + '%';
-                    progressText.textContent = status.status;
+                    progressFill.style.width = (status.progress || 0) + '%';
+                    progressText.textContent = status.message || status.status || 'Processing...';
                     progressDetail.textContent = status.detail || '';
 
                     // Check if complete
@@ -286,7 +288,7 @@
                         showTranslationResult(status);
                     } else if (status.status === 'failed') {
                         clearInterval(progressInterval);
-                        showAlert('Translation failed: ' + (status.error || 'Unknown error'), 'error');
+                        showAlert('Translation failed: ' + (status.message || status.error || 'Unknown error'), 'error');
                         document.getElementById('progress-card').style.display = 'none';
                     }
                 } catch (error) {
@@ -337,7 +339,8 @@
         // Load translation history
         async function loadHistory() {
             try {
-                const history = await api.getTranslationHistory();
+                const response = await api.getTranslationHistory();
+                const history = response.history || [];
                 const historyList = document.getElementById('history-list');
 
                 if (history.length === 0) {
