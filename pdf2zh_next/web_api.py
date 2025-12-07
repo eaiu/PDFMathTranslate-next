@@ -123,11 +123,11 @@ def build_settings_model_from_user_config(user_settings: dict, output_dir: Path,
     elif service == 'AzureOpenAI':
         engine_settings = AzureOpenAISettings(
             azure_openai_api_key=user_settings.get('azure_openai_api_key', ''),
-            azure_openai_base_url=user_settings.get('azure_openai_endpoint', ''),
+            azure_openai_base_url=user_settings.get('azure_openai_base_url', ''),
             azure_openai_model=user_settings.get('azure_openai_model', ''),
             azure_openai_api_version=user_settings.get('azure_openai_api_version', '2024-02-15-preview'),
         )
-    elif service == 'Gemini':
+    elif service in ('Gemini', 'GoogleGemini'):
         engine_settings = GeminiSettings(
             gemini_model=user_settings.get('gemini_model', 'gemini-1.5-flash'),
             gemini_api_key=user_settings.get('gemini_api_key', ''),
@@ -176,7 +176,7 @@ def build_settings_model_from_user_config(user_settings: dict, output_dir: Path,
     settings.translation.lang_out = user_settings.get('lang_to', 'zh')
     settings.translation.output = str(output_dir)
     settings.translation.ignore_cache = user_settings.get('ignore_cache', False)
-    settings.translation.qps = user_settings.get('qps', 4)
+    settings.translation.qps = user_settings.get('custom_qps', user_settings.get('qps', 4))
     
     # Configure PDF settings
     if pages:
@@ -187,7 +187,7 @@ def build_settings_model_from_user_config(user_settings: dict, output_dir: Path,
     settings.pdf.skip_clean = user_settings.get('skip_clean', False)
     settings.pdf.enhance_compatibility = user_settings.get('enhance_compatibility', False)
     settings.pdf.ocr_workaround = user_settings.get('ocr_workaround', False)
-    settings.pdf.translate_table_text = user_settings.get('translate_table_text', True)
+    settings.pdf.translate_table_text = user_settings.get('translate_tables', user_settings.get('translate_table_text', True))
     
     return settings
 
