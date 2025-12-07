@@ -71,16 +71,29 @@ function displayUserInfo() {
  * Show loading overlay
  */
 function showLoading(message = 'Loading...') {
-    const overlay = document.createElement('div');
-    overlay.className = 'loading-overlay';
-    overlay.id = 'loading-overlay';
-    overlay.innerHTML = `
+    let overlay = document.getElementById('loading-overlay');
+
+    if (!overlay) {
+        // Create overlay if it doesn't exist (for pages without static overlay)
+        overlay = document.createElement('div');
+        overlay.id = 'loading-overlay';
+        overlay.className = 'loading-overlay';
+        overlay.innerHTML = `
     <div class="loading-content">
       <div class="spinner"></div>
       <div class="loading-text">${message}</div>
     </div>
   `;
-    document.body.appendChild(overlay);
+        document.body.appendChild(overlay);
+    } else {
+        // Update message in existing overlay
+        const textEl = overlay.querySelector('.loading-text');
+        if (textEl) {
+            textEl.textContent = message;
+        }
+    }
+
+    overlay.style.display = 'flex';
 }
 
 /**
@@ -89,7 +102,7 @@ function showLoading(message = 'Loading...') {
 function hideLoading() {
     const overlay = document.getElementById('loading-overlay');
     if (overlay) {
-        overlay.remove();
+        overlay.style.display = 'none';
     }
 }
 
