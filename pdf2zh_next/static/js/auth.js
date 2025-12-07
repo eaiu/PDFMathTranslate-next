@@ -107,20 +107,45 @@ function hideLoading() {
 }
 
 /**
- * Show alert message
+ * Show alert message - fixed position overlay that doesn't push content
  */
 function showAlert(message, type = 'info') {
+    // Create alert container if not exists
+    let alertContainer = document.getElementById('alert-container');
+    if (!alertContainer) {
+        alertContainer = document.createElement('div');
+        alertContainer.id = 'alert-container';
+        alertContainer.style.cssText = `
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+            pointer-events: none;
+        `;
+        document.body.appendChild(alertContainer);
+    }
+
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type} fade-in`;
+    alertDiv.style.cssText = `
+        pointer-events: auto;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideIn 0.3s ease;
+    `;
     alertDiv.textContent = message;
 
-    const container = document.querySelector('.container') || document.body;
-    container.insertBefore(alertDiv, container.firstChild);
+    alertContainer.appendChild(alertDiv);
 
     setTimeout(() => {
         alertDiv.style.opacity = '0';
+        alertDiv.style.transform = 'translateX(20px)';
+        alertDiv.style.transition = 'all 0.3s ease';
         setTimeout(() => alertDiv.remove(), 300);
-    }, 5000);
+    }, 3000);
 }
 
 /**

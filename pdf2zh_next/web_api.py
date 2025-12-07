@@ -383,6 +383,7 @@ async def get_settings(current_user: dict = Depends(get_current_user)):
 async def update_settings(settings: dict, current_user: dict = Depends(get_current_user)):
     """Update current user's settings"""
     user_dir = user_manager.get_user_dir(current_user['username'])
+    user_dir.mkdir(parents=True, exist_ok=True)
     settings_file = user_dir / "settings.json"
     
     settings_file.write_text(json.dumps(settings, indent=2))
@@ -429,6 +430,7 @@ async def upload_file(
     # Save file to user's upload directory
     user_dir = user_manager.get_user_dir(current_user['username'])
     upload_dir = user_dir / "uploads"
+    upload_dir.mkdir(parents=True, exist_ok=True)
     
     # Generate unique filename
     file_id = str(uuid.uuid4())

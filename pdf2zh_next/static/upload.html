@@ -400,7 +400,7 @@
                 }
 
                 historyList.innerHTML = history.map(item => {
-                    const statusColor = item.status === 'completed' ? 'var(--success)' : item.status === 'failed' ? 'var(--error)' : 'var(--warning)';
+                    const statusColor = item.status === 'completed' ? 'var(--accent-success)' : item.status === 'failed' ? 'var(--accent-error)' : 'var(--accent-warning)';
                     const originalName = item.original_filename || item.filename?.split('_').slice(1).join('_') || item.filename || 'Untitled';
 
                     return `
@@ -418,10 +418,10 @@
                             <!-- Action buttons -->
                             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                                 ${item.status === 'completed' && item.mono_path ?
-                            `<button class="btn btn-sm" style="background: var(--primary); color: white;" onclick="downloadFile('mono', '${item.task_id}')">${i18n.t('upload.result.mono').replace('📥 ', '')}</button>` : ''}
+                            `<button class="btn btn-sm" style="background: var(--accent-primary); color: white;" onclick="downloadFile('mono', '${item.task_id}')">${i18n.t('upload.result.mono').replace('📥 ', '')}</button>` : ''}
                                 ${item.status === 'completed' && item.dual_path ?
-                            `<button class="btn btn-sm" style="background: var(--secondary); color: white;" onclick="downloadFile('dual', '${item.task_id}')">${i18n.t('upload.result.dual').replace('📥 ', '')}</button>` : ''}
-                                <button class="btn btn-sm" style="background: var(--error); color: white;" onclick="deleteHistoryItem('${item.task_id}')" title="${i18n.t('common.delete')}">🗑️</button>
+                            `<button class="btn btn-sm" style="background: #6c757d; color: white;" onclick="downloadFile('dual', '${item.task_id}')">${i18n.t('upload.result.dual').replace('📥 ', '')}</button>` : ''}
+                                <button class="btn btn-sm" style="background: var(--accent-error); color: white;" onclick="deleteHistoryItem('${item.task_id}')" title="${i18n.t('common.delete')}">🗑️</button>
                             </div>
                             
                             <!-- Timestamp -->
