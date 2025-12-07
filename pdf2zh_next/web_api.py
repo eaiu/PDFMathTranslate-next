@@ -24,6 +24,8 @@ from pydantic import BaseModel
 
 from pdf2zh_next.auth import UserManager, AuthenticationError
 from pdf2zh_next.config import ConfigManager
+from pdf2zh_next.config.model import SettingsModel
+from pdf2zh_next.config.translate_engine_model import TRANSLATION_ENGINE_METADATA_MAP
 from pdf2zh_next.high_level import do_translate_async_stream
 
 logger = logging.getLogger(__name__)
@@ -95,6 +97,99 @@ async def get_admin_user(current_user: dict = Depends(get_current_user)) -> dict
     if not current_user.get('is_admin'):
         raise HTTPException(status_code=403, detail="Admin privileges required")
     return current_user
+
+
+def build_settings_model_from_user_config(user_settings: dict, output_dir: Path, pages: str = None) -> SettingsModel:
+    """Build SettingsModel from user's saved settings"""
+    from pdf2zh_next.config.translate_engine_model import (
+        OpenAISettings, AzureOpenAISettings, GeminiSettings, DeepLSettings,
+        OllamaSettings, SiliconFlowSettings, DeepSeekSettings,
+        SiliconFlowFreeSettings, ZhipuSettings, AnythingLLMSettings,
+        ClaudeCodeSettings
+    )
+    
+    # Get translation service from user settings
+    service = user_settings.get('service', 'SiliconFlowFree')
+    
+    # Map service name to engine settings
+    engine_settings = None
+    
+    if service == 'OpenAI':
+        engine_settings = OpenAISettings(
+            openai_model=user_settings.get('openai_model', 'gpt-4o-mini'),
+            openai_api_key=user_settings.get('openai_api_key', ''),
+            openai_base_url=user_settings.get('openai_base_url', 'https://api.openai.com/v1'),
+        )
+    elif service == 'AzureOpenAI':
+        engine_settings = AzureOpenAISettings(
+            azure_openai_api_key=user_settings.get('azure_openai_api_key', ''),
+            azure_openai_base_url=user_settings.get('azure_openai_endpoint', ''),
+            azure_openai_model=user_settings.get('azure_openai_model', ''),
+            azure_openai_api_version=user_settings.get('azure_openai_api_version', '2024-02-15-preview'),
+        )
+    elif service == 'Gemini':
+        engine_settings = GeminiSettings(
+            gemini_model=user_settings.get('gemini_model', 'gemini-1.5-flash'),
+            gemini_api_key=user_settings.get('gemini_api_key', ''),
+        )
+    elif service == 'DeepL':
+        engine_settings = DeepLSettings(
+            deepl_api_key=user_settings.get('deepl_api_key', ''),
+        )
+    elif service == 'Ollama':
+        engine_settings = OllamaSettings(
+            ollama_model=user_settings.get('ollama_model', 'gemma2'),
+            ollama_host=user_settings.get('ollama_host', 'http://127.0.0.1:11434'),
+        )
+    elif service == 'SiliconFlow':
+        engine_settings = SiliconFlowSettings(
+            siliconflow_model=user_settings.get('siliconflow_model', 'Qwen/Qwen2.5-7B-Instruct'),
+            siliconflow_api_key=user_settings.get('siliconflow_api_key', ''),
+        )
+    elif service == 'DeepSeek':
+        engine_settings = DeepSeekSettings(
+            deepseek_model=user_settings.get('deepseek_model', 'deepseek-chat'),
+            deepseek_api_key=user_settings.get('deepseek_api_key', ''),
+        )
+    elif service == 'Zhipu':
+        engine_settings = ZhipuSettings(
+            zhipu_model=user_settings.get('zhipu_model', 'glm-4-flash'),
+            zhipu_api_key=user_settings.get('zhipu_api_key', ''),
+        )
+    elif service == 'Claude':
+        engine_settings = ClaudeCodeSettings(
+            claudecode_model=user_settings.get('claude_model', 'claude-sonnet-4-20250514'),
+            claudecode_api_key=user_settings.get('claude_api_key', ''),
+        )
+    else:
+        # Default to SiliconFlowFree
+        engine_settings = SiliconFlowFreeSettings()
+    
+    # Build SettingsModel
+    settings = SettingsModel(
+        translate_engine_settings=engine_settings,
+        report_interval=0.5,
+    )
+    
+    # Configure translation settings
+    settings.translation.lang_in = user_settings.get('lang_from', 'en')
+    settings.translation.lang_out = user_settings.get('lang_to', 'zh')
+    settings.translation.output = str(output_dir)
+    settings.translation.ignore_cache = user_settings.get('ignore_cache', False)
+    settings.translation.qps = user_settings.get('qps', 4)
+    
+    # Configure PDF settings
+    if pages:
+        settings.pdf.pages = pages
+    settings.pdf.no_dual = user_settings.get('no_dual', False)
+    settings.pdf.no_mono = user_settings.get('no_mono', False)
+    settings.pdf.dual_translate_first = user_settings.get('dual_translate_first', False)
+    settings.pdf.skip_clean = user_settings.get('skip_clean', False)
+    settings.pdf.enhance_compatibility = user_settings.get('enhance_compatibility', False)
+    settings.pdf.ocr_workaround = user_settings.get('ocr_workaround', False)
+    settings.pdf.translate_table_text = user_settings.get('translate_table_text', True)
+    
+    return settings
 
 
 # Authentication endpoints
@@ -319,52 +414,132 @@ async def start_translation(
     }
 
 
-async def run_translation(task_id: str, file_path: Path, output_dir: Path, settings: dict, username: str):
-    """Run translation task in background"""
+async def run_translation(task_id: str, file_path: Path, output_dir: Path, translation_settings: dict, username: str):
+    """Run translation task in background using real translation engine"""
+    mono_path = None
+    dual_path = None
+    original_filename = file_path.stem  # Get filename without extension
+    
     try:
         active_tasks[task_id]["status"] = "processing"
-        active_tasks[task_id]["message"] = "Translation in progress"
+        active_tasks[task_id]["message"] = "Loading user settings..."
         
-        # TODO: Build proper settings from user settings and translation_settings
-        # For now, this is a placeholder
-        # You'll need to integrate with the existing config system
+        # Load user settings
+        user_dir = user_manager.get_user_dir(username)
+        settings_file = user_dir / "settings.json"
+        user_settings = json.loads(settings_file.read_text()) if settings_file.exists() else {}
+        
+        # Get pages from translation_settings if provided
+        pages = translation_settings.get('pages') if translation_settings else None
         
         logger.info(f"Starting translation task {task_id} for user {username}")
+        logger.info(f"User settings: {user_settings}")
         
-        # Simulate translation progress
-        # In real implementation, integrate with do_translate_async_stream
-        for i in range(0, 101, 10):
-            await asyncio.sleep(1)
-            active_tasks[task_id]["progress"] = i
-            active_tasks[task_id]["message"] = f"Translating... {i}%"
+        # Build SettingsModel from user config
+        settings = build_settings_model_from_user_config(user_settings, output_dir, pages)
+        
+        # Validate settings
+        try:
+            settings.validate_settings()
+        except ValueError as e:
+            raise ValueError(f"Invalid translation settings: {e}")
+        
+        active_tasks[task_id]["message"] = "Starting translation..."
+        
+        # Run translation using do_translate_async_stream
+        async for event in do_translate_async_stream(settings, file_path):
+            if event["type"] in ("progress_start", "progress_update", "progress_end"):
+                # Update progress
+                stage = event.get("stage", "Processing")
+                progress = event.get("overall_progress", 0)
+                part_index = event.get("part_index", 1)
+                total_parts = event.get("total_parts", 1)
+                stage_current = event.get("stage_current", 0)
+                stage_total = event.get("stage_total", 1)
+                
+                message = f"{stage} ({part_index}/{total_parts}, {stage_current}/{stage_total})"
+                
+                active_tasks[task_id]["progress"] = int(progress)
+                active_tasks[task_id]["message"] = message
+                
+                logger.debug(f"Task {task_id}: {progress}% - {message}")
+                
+            elif event["type"] == "finish":
+                # Translation completed
+                result = event["translate_result"]
+                
+                # Get actual output paths from the result
+                result_mono_path = result.mono_pdf_path
+                result_dual_path = result.dual_pdf_path
+                
+                # Rename output files to use original filename
+                if result_mono_path and result_mono_path.exists():
+                    mono_path = output_dir / f"{original_filename}_mono.pdf"
+                    result_mono_path.rename(mono_path)
+                    logger.info(f"Mono PDF saved: {mono_path}")
+                
+                if result_dual_path and result_dual_path.exists():
+                    dual_path = output_dir / f"{original_filename}_dual.pdf"
+                    result_dual_path.rename(dual_path)
+                    logger.info(f"Dual PDF saved: {dual_path}")
+                
+                # Get token usage if available
+                token_usage = event.get("token_usage", {})
+                
+                break
+                
+            elif event["type"] == "error":
+                error_msg = event.get("error", "Unknown error")
+                raise RuntimeError(f"Translation error: {error_msg}")
         
         # Mark as complete
         active_tasks[task_id]["status"] = "completed"
         active_tasks[task_id]["progress"] = 100
         active_tasks[task_id]["message"] = "Translation completed"
         active_tasks[task_id]["output_files"] = {
-            "mono": str(output_dir / "translated.pdf"),
-            "dual": str(output_dir / "dual.pdf")
+            "mono": str(mono_path) if mono_path else None,
+            "dual": str(dual_path) if dual_path else None
         }
+        active_tasks[task_id]["original_filename"] = original_filename
         
         # Update user history
-        user_dir = user_manager.get_user_dir(username)
         history_file = user_dir / "history.json"
-        
         history = json.loads(history_file.read_text()) if history_file.exists() else []
         history.append({
             "task_id": task_id,
             "filename": file_path.name,
+            "original_filename": original_filename,
             "created_at": active_tasks[task_id]["created_at"],
             "completed_at": datetime.utcnow().isoformat(),
-            "status": "completed"
+            "status": "completed",
+            "mono_path": str(mono_path) if mono_path else None,
+            "dual_path": str(dual_path) if dual_path else None
         })
         history_file.write_text(json.dumps(history, indent=2))
+        
+        logger.info(f"Translation task {task_id} completed successfully")
         
     except Exception as e:
         logger.error(f"Translation task {task_id} failed: {e}", exc_info=True)
         active_tasks[task_id]["status"] = "failed"
         active_tasks[task_id]["message"] = f"Translation failed: {str(e)}"
+        
+        # Update history with failed status
+        try:
+            user_dir = user_manager.get_user_dir(username)
+            history_file = user_dir / "history.json"
+            history = json.loads(history_file.read_text()) if history_file.exists() else []
+            history.append({
+                "task_id": task_id,
+                "filename": file_path.name,
+                "created_at": active_tasks[task_id]["created_at"],
+                "completed_at": datetime.utcnow().isoformat(),
+                "status": "failed",
+                "error": str(e)
+            })
+            history_file.write_text(json.dumps(history, indent=2))
+        except Exception as hist_error:
+            logger.error(f"Failed to update history: {hist_error}")
 
 
 @app.get("/api/translate/status/{task_id}")

@@ -303,25 +303,30 @@
             document.getElementById('progress-card').style.display = 'none';
             document.getElementById('result-card').style.display = 'block';
 
+            // Get output files from status
+            const outputFiles = status.output_files || {};
+            const monoPath = outputFiles.mono;
+            const dualPath = outputFiles.dual;
+
             // Show download buttons based on available files
-            if (status.mono_path) {
+            if (monoPath) {
                 const monoBtn = document.getElementById('download-mono-btn');
                 monoBtn.style.display = 'block';
-                monoBtn.onclick = () => downloadFile(status.mono_path);
+                monoBtn.onclick = () => downloadFile('mono');
             }
 
-            if (status.dual_path) {
+            if (dualPath) {
                 const dualBtn = document.getElementById('download-dual-btn');
                 dualBtn.style.display = 'block';
-                dualBtn.onclick = () => downloadFile(status.dual_path);
+                dualBtn.onclick = () => downloadFile('dual');
             }
 
             // Reload history
             loadHistory();
         }
 
-        function downloadFile(path) {
-            window.open(`/api/translate/download/${currentTaskId}?type=${path.includes('dual') ? 'dual' : 'mono'}`, '_blank');
+        function downloadFile(fileType) {
+            window.open(`/api/translate/download/${currentTaskId}?file_type=${fileType}`, '_blank');
         }
 
         // New translation button
@@ -359,8 +364,8 @@
                         <small class="text-muted">${formatDate(item.created_at)}</small>
                         ${item.status === 'completed' ? `
                             <div class="flex gap-sm mt-sm">
-                                ${item.mono_path ? `<button class="btn btn-sm btn-secondary" onclick="window.open('/api/translate/download/${item.task_id}?type=mono', '_blank')">📥 Mono</button>` : ''}
-                                ${item.dual_path ? `<button class="btn btn-sm btn-secondary" onclick="window.open('/api/translate/download/${item.task_id}?type=dual', '_blank')">📥 Dual</button>` : ''}
+                                ${item.mono_path ? `<button class="btn btn-sm btn-secondary" onclick="window.open('/api/translate/download/${item.task_id}?file_type=mono', '_blank')">📥 Mono</button>` : ''}
+                                ${item.dual_path ? `<button class="btn btn-sm btn-secondary" onclick="window.open('/api/translate/download/${item.task_id}?file_type=dual', '_blank')">📥 Dual</button>` : ''}
                             </div>
                         ` : ''}
                     </div>
