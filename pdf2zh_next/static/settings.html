@@ -746,32 +746,42 @@
 
         // Initialize on page load
         async function init() {
+            showLoading('Initializing...');
             try {
                 await requireAuth();
                 const userInfo = await updateUserInfo();
 
-                // Show user management tab for admins
-                if (userInfo.is_admin) {
+                // Show user management tab for admins (check userInfo exists)
+                if (userInfo && userInfo.is_admin) {
                     document.getElementById('user-mgmt-tab').style.display = 'block';
+                }
+
+                // Set current username in account settings
+                const usernameInput = document.getElementById('current-username');
+                if (usernameInput && userInfo) {
+                    usernameInput.value = userInfo.username || '';
                 }
 
                 // Load settings
                 await loadSettings();
 
                 // Load users list if admin
-                if (userInfo.is_admin) {
+                if (userInfo && userInfo.is_admin) {
                     await loadUsers();
                 }
             } catch (error) {
                 console.error('Initialization error:', error);
+                showAlert('Failed to initialize: ' + error.message, 'error');
+            } finally {
+                hideLoading();
             }
         }
 
         async function loadSettings() {
-            showLoading();
             try {
                 const response = await api.getSettings();
                 const settings = response.settings || {};
+                console.log('Loaded settings:', settings);
 
                 // Populate all form fields
                 // Basic settings
@@ -865,9 +875,8 @@
                 document.getElementById('term-rate-mode').dispatchEvent(new Event('change'));
 
             } catch (error) {
-                showAlert('Failed to load settings: ' + error.message, 'error');
-            } finally {
-                hideLoading();
+                console.error('Failed to load settings:', error);
+                // Don't show alert here as init() will handle the error display
             }
         }
 
