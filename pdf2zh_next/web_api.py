@@ -264,14 +264,10 @@ def build_settings_model_from_user_config(user_settings: dict, output_dir: Path,
     settings.pdf.figure_table_protection_threshold = user_settings.get('protection_threshold', 0.9)
     settings.pdf.skip_formula_offset_calculation = user_settings.get('skip_formula_offset', False)
     
-    # Map watermark mode - frontend uses 'none', 'watermark', 'both', backend uses 'no_watermark', 'watermarked', 'both'
-    watermark_mode = user_settings.get('watermark_mode', 'watermark')
-    if watermark_mode == 'none':
-        settings.pdf.watermark_output_mode = 'no_watermark'
-    elif watermark_mode == 'both':
-        settings.pdf.watermark_output_mode = 'both'
-    else:
-        settings.pdf.watermark_output_mode = 'watermarked'
+    # Map watermark mode - frontend uses 'watermarked', 'no_watermark', 'both' which matches backend
+    watermark_mode = user_settings.get('watermark_mode', 'watermarked')
+    # Pass through directly as values match backend expected values
+    settings.pdf.watermark_output_mode = watermark_mode
     
     return settings
 
@@ -509,6 +505,7 @@ async def run_translation(task_id: str, file_path: Path, output_dir: Path, trans
     try:
         active_tasks[task_id]["status"] = "processing"
         active_tasks[task_id]["message"] = "Loading user settings..."
+        active_tasks[task_id]["original_filename"] = original_filename  # Store for download filename
         
         # Load user settings
         user_dir = user_manager.get_user_dir(username)
@@ -733,10 +730,22 @@ async def download_translation(
     if not file_path or not Path(file_path).exists():
         raise HTTPException(status_code=404, detail="File not found")
     
+    # Generate meaningful filename: originalname_mono/dual_taskid.pdf
+    original_filename = task.get("original_filename", "translated")
+    # Remove .pdf extension if present
+    if original_filename.lower().endswith('.pdf'):
+        original_filename = original_filename[:-4]
+    # Clean filename for safety
+    import re
+    clean_name = re.sub(r'[^\w\-\u4e00-\u9fff]', '_', original_filename)
+    # Generate download filename
+    short_task_id = task_id[:8]  # Use first 8 chars of UUID for brevity
+    download_filename = f"{clean_name}_{file_type}_{short_task_id}.pdf"
+    
     return FileResponse(
         file_path,
         media_type="application/pdf",
-        filename=Path(file_path).name
+        filename=download_filename
     )
 
 
